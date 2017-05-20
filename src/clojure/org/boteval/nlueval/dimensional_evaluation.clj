@@ -46,7 +46,8 @@
                   execution-config-base
                   evaluation-combo)
 
-              evaluation-result (get-accuracy-at evaluation-config)
+              evaluation-result
+                (get-accuracy-at evaluation-config)
 
               dimensions-column-data
                  (map

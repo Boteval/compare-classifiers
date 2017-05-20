@@ -12,16 +12,17 @@
 
 (defn get-accuracy-at
   [{:keys
-    [objects-tagging
-     gold
-     test-tagging-group-name
-     test-tag
-     n]}]
+     [objects-tagging
+      gold
+      test-tagging-group-name
+      test-tag
+      n]}]
 
-  {:pre [(keyword? gold)
-         (keyword? test-tagging-group-name)]
-         (keyword? test-tag)
-         (number? n)}
+  {:pre
+    [(keyword? gold)
+     (keyword? test-tagging-group-name)]
+     (keyword? test-tag)
+     (number? n)}
 
   " calculates accuracy at n, over the provided objects taggging collection
     see https://www.wikiwand.com/en/Precision_and_recall#/Precision "
@@ -67,37 +68,3 @@
                        true-positives
                        positives) }
         )))
-
-
-
-(defn get-error [gold test penalty-modifier-fn]
-  " calculates the aggregate error between gold and test,
-    applies the provided penalty function to each error distance "
-  (letfn [(row-error
-            [gold test]
-            (let [gold-taggings (val (first gold))
-                  test-taggings (val (first test))
-                  gold-tags (set (map #(:tag %) gold-taggings))
-                  test-tags (set (map #(:tag %) test-taggings))
-                  union (union gold-tags test-tags)]
-
-              (apply + (map (fn tag-error [tag]
-                      (let [gold (first (filter #(= (:tag %) tag) gold-taggings))
-                            test (first (filter #(= (:tag %) tag) test-taggings))]
-                            ;(println gold-taggings)
-                            ;(println test-taggings)
-                            ;(println "gold" gold)
-                            ;(println "test" test)
-                            ;(println (vec [(some? gold) (some? test)]))
-                         (let [error-cost
-                           (penalty-modifier-fn
-                             (case (vec [(some? gold) (some? test)])
-                               [true true]   (- (:confidence gold) (:confidence test))
-                               [true false]  (:confidence gold)
-                               [false true]  (:confidence test)
-                               [false false] 0))]
-                              ;(println error-cost)
-                              error-cost))) union))))]
-
-  (/ (apply + (map row-error gold test))
-     (count gold))))
