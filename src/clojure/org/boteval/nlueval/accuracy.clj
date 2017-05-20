@@ -1,4 +1,4 @@
-(ns org.boteval.nlueval.evaluate
+(ns org.boteval.nlueval.accuracy
   (:require
       [org.boteval.nlueval.util :refer :all]
       [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
@@ -9,9 +9,17 @@
       [puget.printer :refer [cprint]]
       [clojure.inspector :as inspect :refer [inspect-tree]]))
 
-(defn get-accuracy-at [objects-tagging gold test test-tag n]
+
+(defn get-accuracy-at
+  [{:keys
+    [objects-tagging
+     gold
+     test-tagging-group-name
+     test-tag
+     n]}]
+
   {:pre [(keyword? gold)
-         (keyword? test)]
+         (keyword? test-tagging-group-name)]
          (keyword? test-tag)
          (number? n)}
 
@@ -27,7 +35,7 @@
                  gold-taggings (:taggings (get-single #(val=! % :tagging-group-name gold) taggings-groups))
                  gold-tags (set (map #(:tag %) gold-taggings))
 
-                 test-taggings (:taggings (get-single #(val=! % :tagging-group-name test) taggings-groups))
+                 test-taggings (:taggings (get-single #(val=! % :tagging-group-name test-tagging-group-name) taggings-groups))
                  test-tags (set (map #(:tag %) (take n test-taggings)))
 
                  positive?  (contains? gold-tags test-tag)
@@ -93,4 +101,3 @@
 
   (/ (apply + (map row-error gold test))
      (count gold))))
-

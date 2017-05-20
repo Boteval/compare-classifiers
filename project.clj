@@ -32,6 +32,8 @@
 
                  [org.clojure/data.csv "0.1.3"]        ; for csv
 
+                 [org.clojure/math.combinatorics "0.1.4"]
+
                  ;; incanter
                  [incanter/incanter-core "1.5.7"]
                  [incanter/incanter-charts "1.5.7"]

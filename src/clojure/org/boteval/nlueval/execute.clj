@@ -8,10 +8,13 @@
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
     [org.boteval.nlueval.input :refer :all]
     [org.boteval.nlueval.canonical :refer :all]
-    [org.boteval.nlueval.evaluate :refer :all]))
+    [org.boteval.nlueval.dimensional-evaluation :refer :all]))
 
-(defn execute []
-  (let
+
+(defn ^:private evaluate []
+
+  (let  ;; get all the base data ready
+
     [data (read-data)
 
      gold (:gold-set data)
@@ -32,32 +35,44 @@
      ; group by tagging's object id, and add indication for in/out domain,
      ; yielding a list of objects with their meta-data and taggings
      objects-tagging
-       (group-by :object-id all-taggings)]
+       (group-by :object-id all-taggings)
 
-    (let
-      [evaluate
-        (fn
-          [object-taggings gold classifier-under-test]
-          {:pre [(keyword? gold) (keyword? classifier-under-test)]}
+     execution-config-base ;; this execution-config will remain invariant throughout execution combos
+       { :objects-tagging objects-tagging
+         :gold gold
+         :n 3 }]
 
-          " gets the accuracy evaluation per tag for the given classifier "
+     (println "gold tagging has" (count target-tag-set) "unique gold tags:")
+     (cprint target-tag-set)
 
-          (map
-            (fn [target-tag]
-              (hash-map
-                :classifier classifier-under-test
-                :tag target-tag
-                :accuracy (get-accuracy-at objects-tagging gold classifier-under-test target-tag 3)))
-            target-tag-set))
 
-       ; evaluate for all classifiers under test
-       evaluation
-         (flatten (map
-           (partial evaluate objects-tagging gold)
-           classifiers-under-test))]
+     (let
+        [classifiers-dim
+           {:name :classifier
+            :vals classifiers-under-test
+            :evaluation-config-transform
+            (fn [current-dim-val evaluation-config] (assoc evaluation-config :test-tagging-group-name current-dim-val))}
 
-      (println "gold tagging has" (count target-tag-set) "unique gold tags:")
-      (cprint target-tag-set)
+         tags-dim
+           {:name :tag
+            :vals target-tag-set
+            :evaluation-config-transform
+            (fn [current-dim-val evaluation-config] (assoc evaluation-config :test-tag current-dim-val))}
+
+         at-n-dim
+           {:name :n
+            :vals [1 2 3]
+            :evaluation-config-transform
+            (fn [current-dim-val evaluation-config] (assoc evaluation-config :n current-dim-val))}
+
+         dimensions (vec [classifiers-dim tags-dim at-n-dim])] ; evaluation dimensions
+
+         (evaluate-all-dimensions dimensions execution-config-base))))
+
+
+
+(defn execute []
+    (let [evaluation (evaluate)]
 
       ;; writing the raw results to equivalent edn and json files
       (do
@@ -65,6 +80,6 @@
          (spit (io/file "output" "raw.json") (to-json evaluation {:pretty true :escape-non-ascii false}))
          (println "outputs have been written to output directory")
          (println "launching swing output viewer..")
-         (inspect/inspect-tree evaluation)))))
+         (inspect/inspect-tree evaluation))))
 
 

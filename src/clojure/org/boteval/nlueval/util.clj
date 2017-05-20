@@ -64,8 +64,8 @@
 
 
 (defn write-csv [headers data filename]
-  " not in use "
-  (with-open [out-file (io/writer "output" "out-file.csv")]
+
+  (with-open [out-file (io/writer "output" "raw.csv")]
   (csv/write-csv out-file
                  [["abc" "def"]
                   ["ghi" "jkl"]])))
