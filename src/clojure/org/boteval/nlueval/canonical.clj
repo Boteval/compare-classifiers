@@ -11,9 +11,9 @@
 
 
 (defn ^:private value-or-default [value default]
-  " helper returning the supplied value, or the supplied default value if the value is an empty string.
+  " helper returning the supplied value, or the supplied default value if the value is an empty string, or the string 'none'.
     this is currently an input-convention. "
-  (if (= "" value)
+  (if (or (= value "") (= value "none"))
     default
     value))
 
@@ -36,6 +36,11 @@
                :tagging-group-name tagging-group-name
 
                :object-id (object-id-mapping row)
+
+               :object-data-origin (:data-group row) ; TODO: sticking this here is the number one hack of this code base.
+                                                     ;       to clean this up, make the objects-tagging collection a
+                                                     ;       collection where each element is a keyed map, storing
+                                                     ;       this bit of information at the object level there.
 
                :taggings
                  (map

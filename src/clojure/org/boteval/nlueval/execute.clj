@@ -27,7 +27,24 @@
 
         objects-tagging)]
 
-    (println "out of" (count objects-tagging) "objects," (count filtered) "are considered in-domain")
+    filtered))
+
+
+(defn ^:private filter-data-origin-group [objects-tagging origin-name gold]
+  " filters to only objects that belong the given data group.
+    this function will be radically simplified once :object-data-group
+    finds a better home in the collection hierarchy "
+  (let [filtered
+     (filter
+        (fn [object-tagging]
+           (let
+             [taggings-groups (val object-tagging)
+              object-data-origin (:object-data-origin (get-single #(val=! % :tagging-group-name gold) taggings-groups))]
+
+             (= object-data-origin origin-name)))
+
+        objects-tagging)]
+
     filtered))
 
 
@@ -55,10 +72,6 @@
      ; list of all objects for classification
      objects-tagging
        (group-by :object-id all-taggings)
-
-     ; subset of objects which are within-domain
-     in-domain-only-objects-tagging
-       (filter-in-domain objects-tagging gold)
 
      execution-config-base ;; this execution-config will remain invariant throughout execution combos
        { :objects-tagging objects-tagging
@@ -91,14 +104,28 @@
            {:name :in-domain-only?
             :vals [:yes :no]
             :evaluation-config-transform
-            (fn [current-dim-val evaluation-config]
-               (assoc
-                 evaluation-config
-                 :objects-tagging (case current-dim-val
-                    :yes in-domain-only-objects-tagging
-                    :no  objects-tagging)))}
+            (fn [current-dim-val evaluation-config] ;; must base on current to maintain commutativity
+               (let [current (:objects-tagging evaluation-config)]
+                 (assoc
+                   evaluation-config
+                   :objects-tagging (case current-dim-val
+                      :yes (filter-in-domain current gold)
+                      :no  current))))}
 
-         dimensions (vec [in-out-domain classifiers-dim tags-dim at-n-dim])] ; evaluation dimensions
+         in-out-corpus
+           {:name :origin?
+            :vals [:corpus :exa-corpus :all]
+            :evaluation-config-transform
+            (fn [current-dim-val evaluation-config] ;; must base on current to maintain commutativity
+               (let [current (:objects-tagging evaluation-config)]
+                 (assoc
+                   evaluation-config
+                   :objects-tagging (case current-dim-val
+                      :corpus     (filter-data-origin-group current :corpus gold)
+                      :exa-corpus (filter-data-origin-group current :exa-corpus gold)
+                      :all current))))}
+
+         dimensions (vec [in-out-corpus in-out-domain classifiers-dim tags-dim at-n-dim])] ; evaluation dimensions
 
          (evaluate-all-dimensions dimensions execution-config-base))))
 
@@ -112,7 +139,8 @@
          (spit (io/file "output" "raw.edn") (with-out-str (pprint evaluation))) ; note! any downstream println will go to the file too
          (spit (io/file "output" "raw.json") (to-json evaluation {:pretty true :escape-non-ascii false}))
          (println "outputs have been written to output directory")
-         (println "launching swing output viewer..")
-         (inspect/inspect-tree evaluation))))
+         #_(do
+           (println "launching swing output viewer..")
+           (inspect/inspect-tree evaluation)))))
 
 

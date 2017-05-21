@@ -101,31 +101,49 @@
         input-mapping (read-string (slurp (io/file relative-path file-name)))]
 
     (println (str "input mappings loaded from " file-name " under the " relative-path " directory"))
-    (let [data-file (:data-file input-mapping)]
-      (with-open [input-file (io/reader (io/file "input" data-file))]
-         (let
-            [input-data (doall (csv/read-csv input-file))
 
-             object-id-mapping (keyword (:object-id (:headers-mapping input-mapping)))
-             tagging-set-names (set (map key (:classification-result-sets (:headers-mapping input-mapping))))
-             gold :gold ; the result set having the keyword :gold is assumed to be the gold result set
-             result-set-names (difference tagging-set-names (set [gold]))
+    (let
+      [csvs
+        (map
+          (fn
+            [data-file]
+              (with-open [input-file (io/reader (io/file "input" (:file data-file)))]
+                (println "reading data file" (:file data-file))
+                { :data-group (:data-group data-file)
+                  :content (doall (csv/read-csv input-file)) }))
+          (:data-files input-mapping))
 
-             headers (map #(keyword %) (first input-data))
+       headers
+         (do
+           (assert (apply = (map #(first (:content %)) csvs))
+             " to use multiple data files, all data files must have identical column headers ")
+           (map keyword (first (:content (first csvs))))) ; given they all have the same headers row...
 
-             data (map #(apply hash-map (interleave headers %)) (rest input-data)) ; could probably simply with zipmap
-             data (or (validate-and-fix-unique data object-id-mapping) data)       ; if needed, de-duplicate the data
+       data
+         (flatten (map
+           (fn [csv]
+             (map
+               (fn [content-row]
+                 (zipmap (cons :data-group headers) (cons (:data-group csv) content-row)))
+               (rest (:content csv))))
+          csvs))
 
-             tagging-group-mappings (get-result-sets-mapping (:headers-mapping input-mapping))]
+       object-id-mapping (keyword (:object-id (:headers-mapping input-mapping)))
+       tagging-set-names (set (map key (:classification-result-sets (:headers-mapping input-mapping))))
+       gold :gold ; the result set having the keyword :gold is assumed to be the gold result set
+       result-set-names (difference tagging-set-names (set [gold]))
 
-            (println "the following tagging sets are described by the mapping file:" (clojure.string/join ", " (map name result-set-names)))
-            (println "tagging set" gold "taken as the gold dataset")
-            (println "data file" data-file "read")
-            (println "input data comprises" (count data) "objects")
-            (println "using object id header:" (name object-id-mapping))
+       data (or (validate-and-fix-unique data object-id-mapping) data) ; if needed, de-duplicate the data
 
-            { :data data
-              :object-id-mapping object-id-mapping
-              :gold-set gold
-              :result-sets result-set-names
-              :tagging-group-mappings tagging-group-mappings })))))
+       tagging-group-mappings (get-result-sets-mapping (:headers-mapping input-mapping))]
+
+         (println "the following tagging sets are described by the mapping file:" (clojure.string/join ", " (map name result-set-names)))
+         (println "tagging set" gold "taken as the gold dataset")
+         (println "input data comprises" (count data) "objects")
+         (println "using object id header:" (name object-id-mapping))
+
+         { :data data
+           :object-id-mapping object-id-mapping
+           :gold-set gold
+           :result-sets result-set-names
+           :tagging-group-mappings tagging-group-mappings })))
