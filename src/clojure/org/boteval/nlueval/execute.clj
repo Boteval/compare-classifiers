@@ -8,6 +8,7 @@
     [clojure.java.io :as io]
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
     [org.boteval.nlueval.input :refer :all]
+    [org.boteval.nlueval.output :refer :all]
     [org.boteval.nlueval.canonical :refer :all]
     [org.boteval.nlueval.dimensional-evaluation :refer :all]))
 
@@ -125,7 +126,7 @@
                       :exa-corpus (filter-data-origin-group current :exa-corpus gold)
                       :all current))))}
 
-         dimensions (vec [in-out-corpus in-out-domain classifiers-dim tags-dim at-n-dim])] ; evaluation dimensions
+         dimensions (vec [in-out-corpus in-out-domain tags-dim at-n-dim classifiers-dim])] ; evaluation dimensions
 
          (evaluate-all-dimensions dimensions execution-config-base))))
 
@@ -138,6 +139,7 @@
       (do
          (spit (io/file "output" "raw.edn") (with-out-str (pprint evaluation))) ; note! any downstream println will go to the file too
          (spit (io/file "output" "raw.json") (to-json evaluation {:pretty true :escape-non-ascii false}))
+         (write-csv "output" "raw.csv" (csv-format evaluation))
          (println "outputs have been written to output directory")
          #_(do
            (println "launching swing output viewer..")

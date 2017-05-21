@@ -56,7 +56,7 @@
          true-positives (count (filter #(:true-positive? %) row-evaluations))
          false-positives (count (filter #(:false-positive? %) row-evaluations))]
 
-          { :positives positives
+          { :support positives
             :true-positives true-positives
             :false-positives false-positives
 

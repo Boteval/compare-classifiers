@@ -63,10 +63,3 @@
   (= (get! map key) expected-value))
 
 
-(defn write-csv [headers data filename]
-
-  (with-open [out-file (io/writer "output" "raw.csv")]
-  (csv/write-csv out-file
-                 [["abc" "def"]
-                  ["ghi" "jkl"]])))
-
