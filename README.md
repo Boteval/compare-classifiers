@@ -30,8 +30,14 @@ Your real mapping file should be placed under directory "input", and it must be 
 ;;;
 
 {
-  ; name of the provided input data file, expected under directory "input"
-  :data-file file1.csv
+  :data-files
+    ; one or more input data files, expected under directory "input".
+    ; to maintain traceability, the data within each file will be associated with the name provided by :data-group.
+    [ {:file "parties' results for test set batch 1 ― single Boris model - results.csv"
+       :data-group :corpus}
+
+      {:file "gold and acquired ― test set batch 2 ― single Boris models - results.csv"
+       :data-group :exa-corpus} ]
 
   ; mapping of column header names, to enable reading the gold and
   ; result classifications, from the above provided input data file
@@ -62,6 +68,12 @@ Your real mapping file should be placed under directory "input", and it must be 
            [[:bar-label1 :bar-label1-score 1]
             [:bar-label2 :bar-label2-score 1]]}}}
 ```
+
+## Important notes about input data conventions
+
+1. All input data files must have the same headers structure.
+2. In the input data files, empty cells as well as the string "none", will be regarded as "no category assigned". This behavior can be confirmed in the source, in function `value-or-default`.
+3. An object id must be unique across all input data files provided to a single run.
 
 
 ## License
