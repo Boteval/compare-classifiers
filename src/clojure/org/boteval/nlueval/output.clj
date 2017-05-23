@@ -25,7 +25,7 @@
 (defn write-csv [path filename {:keys [headers data]}]
   (println headers)
   (println (first data))
-  (with-open [out-file (io/writer filename)] ; TODO: make a writeer out of a clojure.java.io/file to include an OS agnostic path to write the CSV file under the output dir
+  (with-open [out-file (io/writer (io/file "output" filename))] ; TODO: make a writeer out of a clojure.java.io/file to include an OS agnostic path to write the CSV file under the output dir
     (csv/write-csv
       out-file
       (cons headers data))))
