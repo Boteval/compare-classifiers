@@ -67,13 +67,20 @@ Your real mapping file should be placed under directory "input", and it must be 
           :bar
            [[:bar-label1 :bar-label1-score 1]
             [:bar-label2 :bar-label2-score 1]]}}}
+
+  ;; sometimes input data is dirty, containing irrelevant classes.
+  ;; if the following entry is included, classes outside this list will be ignored.
+  :valid-classes
+    ["class A"
+     "class B"
+     "class C"]
+}
 ```
 
 ## Important notes about input data conventions
 
 1. All input data files must have the same headers structure.
-2. In the input data files, empty cells as well as the string "none", will be regarded as "no category assigned". This behavior can be confirmed in the source, in function `value-or-default`.
-3. An object id must be unique across all input data files provided to a single run.
+2. An object id must be unique across all input data files provided to a single run.
 
 
 ## License

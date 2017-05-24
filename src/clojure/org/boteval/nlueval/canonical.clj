@@ -9,16 +9,21 @@
       [puget.printer :refer [cprint]]
       [clojure.inspector :as inspect :refer [inspect-tree]]))
 
-
 (defn ^:private value-or-default [value default]
-  " helper returning the supplied value, or the supplied default value if the value is an empty string, or the string 'none'.
-    this is currently an input-convention. "
-  (if (or (= value "") (= value "none"))
+  " helper returning the supplied value, or the supplied default value if the value is an empty string.
+    useful for translating to nils from CSV input. "
+  (if (= value "")
     default
     value))
 
+(def ^:private filtered-tags (atom (list)))
+
 (defn ^:private get-canonical-for-row
-  [object-id-mapping tagging-group-mappings tagging-group-name row]
+  [valid-classes-set
+   object-id-mapping
+   tagging-group-mappings
+   tagging-group-name
+   row]
   {:pre [(keyword? object-id-mapping)]}
 
    " derives a canonical tagging for the given row, for the requested result set name.
@@ -28,6 +33,19 @@
        + confidence scores are normalized to the [0,1] range
        + missing confidence scores are transformed to a confidence of 1
        + null tags are discarded "
+
+  (let
+    [filtered-get-tag-value (fn
+       [value allowed-classes]
+       {:pre [(set? allowed-classes)]}
+
+       " filters away tags outside the allowed tag list "
+
+       (if (contains? allowed-classes value)
+          value
+          (do
+             (swap! filtered-tags conj value)
+             nil)))]
 
    (let [result-set-mapping (val (first (first (filter #(= tagging-group-name (key (first %))) tagging-group-mappings))))]
      (let [raw-result-set
@@ -53,7 +71,9 @@
 
                                    :tag (let
                                           [value (get row header)]
-                                          (value-or-default value nil))
+                                          (if valid-classes-set
+                                            (filtered-get-tag-value value valid-classes-set)
+                                            (value-or-default value nil)))
 
                                    :confidence (let
                                                  [value
@@ -75,20 +95,30 @@
                       tagging :confidence
                       #(/ % (:confidence-scale tagging))))
 
-                 (filter #(some? (:tag %)) taggings) ; filtering out nil taggings
-              ))))))
+                 (filter #(some? (:tag %)) taggings) ; filtering out nil taggings!!
+              )))))))
 
 
-(defn get-canonical-tagging [{:keys [data object-id-mapping tagging-group-mappings]} tagging-group-name]
+(defn get-canonical-tagging
+  [{:keys [data object-id-mapping valid-classes-set tagging-group-mappings]} tagging-group-name]
   " get taggings per object-id, for the given tagging group name "
-  (map
-    (partial get-canonical-for-row
-               object-id-mapping
-               tagging-group-mappings
-               tagging-group-name)
-    data))
+  (let
+    [result
+      (doall (map
+        (partial get-canonical-for-row
+                   valid-classes-set
+                   object-id-mapping
+                   tagging-group-mappings
+                   tagging-group-name)
+        data))]
 
+    (if (not-empty @filtered-tags) (do
+      (println (count @filtered-tags) "tags outside the allowed tag list are found in result set" tagging-group-name "and will be ignored:")
+      (cprint (frequencies @filtered-tags))))
+
+    result))
 
 (defn get-tag-set [tagging]
   " extract the unique set of tags included in the provided tagging "
-  (set (map #(:tag %) tagging)))
+  #_(inspect/inspect-tree (doall (map :tag tagging)))
+  (set (map :tag tagging)))

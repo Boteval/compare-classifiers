@@ -78,9 +78,8 @@
        { :objects-tagging objects-tagging
          :gold gold }]
 
-     (println "gold tagging has" (count target-tag-set) "unique gold tags:")
+     (println "gold tagging contains" (count target-tag-set) "unique tags:")
      (cprint target-tag-set)
-
 
      (let
         [classifiers-dim
@@ -126,7 +125,13 @@
                       :exa-corpus (filter-data-origin-group current :exa-corpus gold)
                       :all current))))}
 
-         dimensions (vec [in-out-corpus in-out-domain tags-dim at-n-dim classifiers-dim])] ; evaluation dimensions
+         dimensions
+           (vec
+             [in-out-corpus
+              in-out-domain
+              tags-dim
+              at-n-dim
+              classifiers-dim])] ; evaluation dimensions
 
          (evaluate-all-dimensions dimensions execution-config-base))))
 

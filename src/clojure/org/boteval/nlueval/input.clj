@@ -98,7 +98,7 @@
   " loads the input data and its mapping "
 
   (let [relative-path "input" file-name "mapping.edn"
-        input-mapping (read-string (slurp (io/file relative-path file-name)))]
+        config-map (read-string (slurp (io/file relative-path file-name)))]
 
     (println (str "input mappings loaded from " file-name " under the " relative-path " directory"))
 
@@ -111,7 +111,7 @@
                 (println "reading data file" (:file data-file))
                 { :data-group (:data-group data-file)
                   :content (doall (csv/read-csv input-file)) }))
-          (:data-files input-mapping))
+          (:data-files config-map))
 
        headers
          (do
@@ -128,22 +128,33 @@
                (rest (:content csv))))
           csvs))
 
-       object-id-mapping (keyword (:object-id (:headers-mapping input-mapping)))
-       tagging-set-names (set (map key (:classification-result-sets (:headers-mapping input-mapping))))
+       object-id-mapping (keyword (:object-id (:headers-mapping config-map)))
+
+       valid-classes-set
+         (if-let [valid-classes (:valid-classes config-map)]
+           (set valid-classes)
+           nil)
+
+       tagging-set-names (set (map key (:classification-result-sets (:headers-mapping config-map))))
        gold :gold ; the result set having the keyword :gold is assumed to be the gold result set
        result-set-names (difference tagging-set-names (set [gold]))
 
        data (or (validate-and-fix-unique data object-id-mapping) data) ; if needed, de-duplicate the data
 
-       tagging-group-mappings (get-result-sets-mapping (:headers-mapping input-mapping))]
+       tagging-group-mappings (get-result-sets-mapping (:headers-mapping config-map))]
 
-         (println "the following tagging sets are described by the mapping file:" (clojure.string/join ", " (map name result-set-names)))
-         (println "tagging set" gold "taken as the gold dataset")
-         (println "input data comprises" (count data) "objects")
-         (println "using object id header:" (name object-id-mapping))
+         (do
+           (println "the following tagging sets are described by the mapping file:" (clojure.string/join ", " (map name result-set-names)))
+           (println "tagging set" gold "taken as the gold dataset")
+           (println "input data comprises" (count data) "objects")
+           (println "using object id header:" (name object-id-mapping))
+           (if valid-classes-set (do
+             (println (count valid-classes-set) "valid classes are prescribed by the mapping file:")
+             (cprint valid-classes-set))))
 
          { :data data
            :object-id-mapping object-id-mapping
+           :valid-classes-set valid-classes-set
            :gold-set gold
            :result-sets result-set-names
            :tagging-group-mappings tagging-group-mappings })))
