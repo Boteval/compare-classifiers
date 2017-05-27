@@ -8,11 +8,10 @@
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
     [clojure.math.combinatorics :as combo]
     [org.boteval.nlueval.input :refer :all]
-    [org.boteval.nlueval.canonical :refer :all]
-    [org.boteval.nlueval.accuracy :refer :all]))
+    [org.boteval.nlueval.canonical :refer :all]))
 
 
-(defn evaluate-all-dimensions [dimensions execution-config-base]
+(defn evaluate-all-dimensions [evaluation-fn dimensions execution-config-base]
 
   " drive evaluation over multiple provided dimensions "
 
@@ -47,7 +46,7 @@
                   evaluation-combo)
 
               evaluation-result
-                (get-accuracy-at evaluation-config)
+                (evaluation-fn evaluation-config)
 
               dimensions-column-data
                  (map

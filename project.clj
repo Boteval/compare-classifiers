@@ -43,6 +43,13 @@
                  [io.aviso/pretty "0.1.33"] ; pretty exceptions in leinigen (http://ioavisopretty.readthedocs.io/en/latest/lein-plugin.html)
                  [mvxcvi/puget "1.0.1"]]    ; color printing function (https://github.com/greglook/puget#usage), see `with-color` and `cprint`
 
+  :profiles {:dev {:dependencies
+                    [[org.clojure/tools.trace "0.7.5"]
+                     [criterium "0.4.3"]
+                     [rhizome "0.2.5"]
+                     ;[org.noisesmith.poirot :as poirot]
+                     ]}}
+
   :plugins [[io.aviso/pretty "0.1.33"]      ; pretty exceptions in leinigen, needed here as well as in :dependencies
             [mvxcvi/whidbey "1.3.1"]        ; more colorful repl (https://github.com/greglook/whidbey)
             [lein-codox "0.10.3"]

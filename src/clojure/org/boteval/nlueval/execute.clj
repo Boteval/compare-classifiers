@@ -10,7 +10,9 @@
     [org.boteval.nlueval.input :refer :all]
     [org.boteval.nlueval.output :refer :all]
     [org.boteval.nlueval.canonical :refer :all]
-    [org.boteval.nlueval.dimensional-evaluation :refer :all]))
+    [org.boteval.nlueval.dimensional-evaluation :refer :all]
+    [org.boteval.nlueval.accuracy  :refer :all]
+    [org.boteval.nlueval.accuracy2 :refer :all]))
 
 
 (defn ^:private filter-in-domain [objects-tagging gold]
@@ -49,7 +51,7 @@
     filtered))
 
 
-(defn ^:private evaluate []
+(defn ^:private evaluate [accuracy-model]
 
   (let  ;; get all the base data ready
 
@@ -133,21 +135,22 @@
               at-n-dim
               classifiers-dim])] ; evaluation dimensions
 
-         (evaluate-all-dimensions dimensions execution-config-base))))
+         (evaluate-all-dimensions accuracy-model dimensions execution-config-base))))
 
 
 
 (defn execute []
-    (let [evaluation (doall (evaluate))]
+    (let [evaluation (doall (evaluate get-accuracy-at))
+          accuracy-model-name "accuracy-at"
+          file-with-parents (partial file-with-parents (list "output" accuracy-model-name))]
 
       ;; writing the raw results to equivalent edn and json files
-      (do
-         (spit (io/file "output" "raw.edn") (with-out-str (pprint evaluation))) ; note! any downstream println will go to the file too
-         (spit (io/file "output" "raw.json") (to-json evaluation {:pretty true :escape-non-ascii false}))
-         (write-csv "output" "raw.csv" (csv-format evaluation))
-         (println "outputs have been written to output directory")
-         #_(do
-           (println "launching swing output viewer..")
-           (inspect/inspect-tree evaluation)))))
+      (spit (file-with-parents "raw.edn") (with-out-str (pprint evaluation))) ; note! any downstream println will go to the file too
+      (spit (file-with-parents "raw.json") (to-json evaluation {:pretty true :escape-non-ascii false}))
+      (write-csv (file-with-parents "raw.csv") (csv-format evaluation))
+      (println "outputs have been written to output directory")
+      #_(do
+        (println "launching swing output viewer..")
+        (inspect/inspect-tree evaluation))))
 
 

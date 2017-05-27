@@ -21,9 +21,15 @@
 (defn square [distance] (* distance distance))
 
 
-(defn undef-or-divide [a b]
+(defn divide-or-undef [a b]
   " divides a by b, or returns :undef if b is zero "
   (if (= b 0) :undef
+    (float (/ a b))))
+
+
+(defn divide-or-default [a b default]
+  " divides a by b, or returns default value if b is zero "
+  (if (= b 0) default
     (float (/ a b))))
 
 
@@ -63,3 +69,19 @@
   (= (get! map key) expected-value))
 
 
+(defn file-with-parents [path filename]
+  {:pre [(list? path) (string? filename)]}
+  " returns file object ready to use, creating its parents hierarchy if it does not exist yet "
+  (let
+    [full-path (concat path (list filename))
+      file (apply io/file full-path)]
+    (io/make-parents file)
+    file))
+
+
+(defn spit-create [& args]
+  " like spit, but creates the full path to the file if it doesn't exist yet "
+  (let [path (drop-last args)
+        file (apply io/file path)]
+    (io/make-parents file)
+    (spit file (last args))))

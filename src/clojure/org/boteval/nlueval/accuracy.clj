@@ -11,6 +11,7 @@
 
 
 (defn get-accuracy-at
+
   [{:keys
      [objects-tagging
       gold
@@ -20,12 +21,13 @@
 
   {:pre
     [(keyword? gold)
-     (keyword? test-tagging-group-name)]
-     (keyword? test-tag)
-     (number? n)}
+     (keyword? test-tagging-group-name)
+     (string? test-tag)
+     (number? n)]}
 
-  " calculates accuracy at n, over the provided objects taggging collection
-    see https://www.wikiwand.com/en/Precision_and_recall#/Precision "
+  " calculates simple accuracy at n for the provided test-tag, over the provided objects
+
+    see also https://www.wikiwand.com/en/Precision_and_recall#/Precision "
 
   (letfn
     [(row-evaluation
@@ -52,19 +54,19 @@
       (let
         [row-evaluations (map row-evaluation objects-tagging)
 
-         positives (count (filter #(:positive? %) row-evaluations))
-         true-positives (count (filter #(:true-positive? %) row-evaluations))
-         false-positives (count (filter #(:false-positive? %) row-evaluations))]
+         positives (count (filter :positive? row-evaluations))
+         true-positives (count (filter :true-positive? row-evaluations))
+         false-positives (count (filter :false-positive? row-evaluations))]
 
           { :support positives
             :true-positives true-positives
             :false-positives false-positives
 
-            :precision (undef-or-divide
+            :precision (divide-or-undef
                           true-positives
                           (+ true-positives false-positives))
 
-            :recall (undef-or-divide
+            :recall (divide-or-undef
                        true-positives
                        positives) }
         )))

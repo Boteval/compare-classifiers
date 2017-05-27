@@ -22,10 +22,11 @@
         #(map de-keyword %)
       (map vals evaluation)) })
 
-(defn write-csv [path filename {:keys [headers data]}]
+(defn write-csv [path {:keys [headers data]}]
+  {:pre [(instance? java.io.File path)]}
   (println headers)
   (println (first data))
-  (with-open [out-file (io/writer (io/file "output" filename))] ; TODO: make a writeer out of a clojure.java.io/file to include an OS agnostic path to write the CSV file under the output dir
+  (with-open [out-file (io/writer path)] ; TODO: make a writeer out of a clojure.java.io/file to include an OS agnostic path to write the CSV file under the output dir
     (csv/write-csv
       out-file
       (cons headers data))))
