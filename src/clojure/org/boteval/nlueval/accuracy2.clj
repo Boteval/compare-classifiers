@@ -63,7 +63,11 @@
                      (count union-set)
                      1)] ; default to perfect accuracy if no predictions nor gold tags for the object
 
-             { :correct-vs-gold correct-vs-gold
+             { :object-id object-id
+               :gold-tags gold-tags
+               :test-tags test-tags
+
+               :correct-vs-gold correct-vs-gold
                :correct-vs-predicted correct-vs-predicted
                :intersection-vs-union intersection-vs-union}))]
 

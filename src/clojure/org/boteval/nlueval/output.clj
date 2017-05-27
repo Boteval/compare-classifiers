@@ -15,7 +15,7 @@
 (defn csv-format [evaluation]
   " turns the evaluation collection into csv writing input "
   (assert (apply = (map keys evaluation))
-    "internal error: evaluation result data has inconsistent row keys, cannot be converted to csv")
+    "internal error: data has inconsistent row keys, cannot be converted to csv")
   { :headers (map name (keys (first evaluation))) ;; as all rows have same key set
     :data
       (map
@@ -24,8 +24,11 @@
 
 (defn write-csv [path {:keys [headers data]}]
   {:pre [(instance? java.io.File path)]}
-  (println headers)
-  (println (first data))
+
+  #_(do
+    (println headers)
+    (println (first data)))
+
   (with-open [out-file (io/writer path)] ; TODO: make a writeer out of a clojure.java.io/file to include an OS agnostic path to write the CSV file under the output dir
     (csv/write-csv
       out-file

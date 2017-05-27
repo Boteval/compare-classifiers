@@ -51,6 +51,25 @@
     filtered))
 
 
+(defn ^:private write [evaluation-name evaluation]
+    (let
+      [path (list "output" evaluation-name)
+       file-with-parents (partial file-with-parents path)]
+
+      ;; writing the raw results to equivalent edn and json files
+      (spit (file-with-parents "raw.edn") (with-out-str (pprint evaluation))) ; note! any downstream println will go to the file too
+      (spit (file-with-parents "raw.json") (to-json evaluation {:pretty true :escape-non-ascii false}))
+
+      ;; writing the csv results
+      (write-csv (file-with-parents "raw.csv") (csv-format evaluation))
+      (println "outputs have been written to output directory" (.getPath (apply io/file path)))
+
+      #_(do
+        (println "launching swing output viewer..")
+        (inspect/inspect-tree evaluation))))
+
+
+
 (defn ^:private write-evaluation-result [evaluation-name evaluation]
     (let
       [path (list "output" evaluation-name)
@@ -63,6 +82,7 @@
       ;; writing the csv results
       (write-csv (file-with-parents "raw.csv") (csv-format evaluation))
       (println "outputs have been written to output directory" (.getPath (apply io/file path)))
+
       #_(do
         (println "launching swing output viewer..")
         (inspect/inspect-tree evaluation))))

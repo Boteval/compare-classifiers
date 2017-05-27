@@ -46,7 +46,11 @@
                  true-positive?  (and positive? predicted?)
                  false-positive? (and (not positive?) predicted?)]
 
-             { :positive? positive?
+             { :object-id object-id
+               :gold-tags gold-tags
+               :test-tags test-tags
+
+               :positive? positive?
                :predicted? predicted?
                :true-positive? true-positive?
                :false-positive? false-positive? }))]
