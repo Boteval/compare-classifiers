@@ -10,7 +10,7 @@
       [clojure.inspector :as inspect :refer [inspect-tree]]))
 
 
-(defn get-accuracy-Godbole
+(defn Godbole-accuracy
 
   [{:keys
      [objects-tagging
@@ -57,7 +57,7 @@
                      (count test-tags)
                      1) ; default to voidly perfect precision if no predictions made for the object
 
-                 intersection-vs-union
+                 intersection-vs-union ; for accuracy summation
                    (divide-or-default
                      (count intersection-set)
                      (count union-set)
@@ -66,6 +66,7 @@
              { :correct-vs-gold correct-vs-gold
                :correct-vs-predicted correct-vs-predicted
                :intersection-vs-union intersection-vs-union}))]
+
 
       (let
         [row-evaluations (map row-evaluation objects-tagging)

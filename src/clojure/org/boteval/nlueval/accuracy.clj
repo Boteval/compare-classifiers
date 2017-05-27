@@ -10,7 +10,7 @@
       [clojure.inspector :as inspect :refer [inspect-tree]]))
 
 
-(defn get-accuracy-at
+(defn accuracy-at
 
   [{:keys
      [objects-tagging

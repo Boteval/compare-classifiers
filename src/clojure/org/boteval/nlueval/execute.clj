@@ -51,7 +51,27 @@
     filtered))
 
 
-(defn ^:private evaluate [accuracy-model]
+(defn ^:private write-evaluation-result [evaluation-name evaluation]
+    (let
+      [path (list "output" evaluation-name)
+       file-with-parents (partial file-with-parents path)]
+
+      ;; writing the raw results to equivalent edn and json files
+      (spit (file-with-parents "raw.edn") (with-out-str (pprint evaluation))) ; note! any downstream println will go to the file too
+      (spit (file-with-parents "raw.json") (to-json evaluation {:pretty true :escape-non-ascii false}))
+
+      ;; writing the csv results
+      (write-csv (file-with-parents "raw.csv") (csv-format evaluation))
+      (println "outputs have been written to output directory" (.getPath (apply io/file path)))
+      #_(do
+        (println "launching swing output viewer..")
+        (inspect/inspect-tree evaluation))))
+
+
+
+(defn execute []
+
+  " drive evaluation on two evaluation methods sharing some of their dimensions "
 
   (let  ;; get all the base data ready
 
@@ -74,11 +94,7 @@
 
      ; list of all objects for classification
      objects-tagging
-       (group-by :object-id all-taggings)
-
-     execution-config-base ;; this execution-config will remain invariant throughout execution combos
-       { :objects-tagging objects-tagging
-         :gold gold }]
+       (group-by :object-id all-taggings)]
 
      (println "gold tagging contains" (count target-tag-set) "unique tags:")
      (cprint target-tag-set)
@@ -125,32 +141,34 @@
                    :objects-tagging (case current-dim-val
                       :corpus     (filter-data-origin-group current :corpus gold)
                       :exa-corpus (filter-data-origin-group current :exa-corpus gold)
-                      :all current))))}
+                      :all current))))}]
 
-         dimensions
-           (vec
-             [in-out-corpus
-              in-out-domain
-              tags-dim
-              at-n-dim
-              classifiers-dim])] ; evaluation dimensions
+           (write-evaluation-result
+             "accuracy-at"
+             (evaluate-on-dimensions
+               { :evaluation-fn accuracy-at
+                 :evaluation-config-base
+                    {:objects-tagging objects-tagging
+                     :gold gold}
+                 :dimensions
+                    [in-out-corpus
+                     in-out-domain
+                     tags-dim
+                     at-n-dim
+                     classifiers-dim]}))
 
-         (evaluate-all-dimensions accuracy-model dimensions execution-config-base))))
+           (write-evaluation-result
+             "Godbole-accuracy"
+             (evaluate-on-dimensions
+               { :evaluation-fn Godbole-accuracy
+                 :evaluation-config-base
+                    {:objects-tagging objects-tagging
+                     :gold gold
+                     :n 3}
+                 :dimensions
+                    [in-out-corpus
+                     in-out-domain
+                     classifiers-dim]})))))
 
-
-
-(defn execute []
-    (let [evaluation (doall (evaluate get-accuracy-at))
-          accuracy-model-name "accuracy-at"
-          file-with-parents (partial file-with-parents (list "output" accuracy-model-name))]
-
-      ;; writing the raw results to equivalent edn and json files
-      (spit (file-with-parents "raw.edn") (with-out-str (pprint evaluation))) ; note! any downstream println will go to the file too
-      (spit (file-with-parents "raw.json") (to-json evaluation {:pretty true :escape-non-ascii false}))
-      (write-csv (file-with-parents "raw.csv") (csv-format evaluation))
-      (println "outputs have been written to output directory")
-      #_(do
-        (println "launching swing output viewer..")
-        (inspect/inspect-tree evaluation))))
 
 

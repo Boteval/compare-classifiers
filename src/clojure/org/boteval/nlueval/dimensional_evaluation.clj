@@ -11,9 +11,16 @@
     [org.boteval.nlueval.canonical :refer :all]))
 
 
-(defn evaluate-all-dimensions [evaluation-fn dimensions execution-config-base]
+(defn evaluate-on-dimensions [{:keys [dimensions evaluation-fn evaluation-config-base]}]
 
-  " drive evaluation over multiple provided dimensions "
+  " drives the supplied evaluation function across multiple provided dimensions,
+    iterating through the cartesian product of all supplied dimensions' values.
+    at each evaluation, the arguments to the evaluation function are obtained from
+    two sources: the supplied dimensions, and the evaluation config base.
+
+    accordingly, collectively, the evaluation config base, and the mappings
+    included with each dimension, should enable this function to pass all
+    arguments required by the evaluation function. "
 
   (let
     ;; cartesian product describing
@@ -42,7 +49,7 @@
                 (reduce
                   (fn apply-args-transform [config dim-action-struct]
                     ((:evaluation-config-transform dim-action-struct) config))
-                  execution-config-base
+                  evaluation-config-base
                   evaluation-combo)
 
               evaluation-result
