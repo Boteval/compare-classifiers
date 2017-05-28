@@ -59,7 +59,7 @@
     the file name will indicate the args of the evaluation "
   (let
     [path (list "output" evaluation-name "traces")
-     filename (clojure.string/join "|" args)
+     filename (str (clojure.string/join "|" args) ".csv")
      file-with-parents (file-with-parents path filename)]
 
     (write-csv file-with-parents (csv-format objects-analysis))))

@@ -10,7 +10,7 @@ Git clone this repo.
 
 2. Place the following into the `input` directory:
 
-        2.1 the CSV data file containing the tagging results to be analyzed
+        2.1 one or more CSV data files containing a gold tagging alongside a classifier's tagging per object.
 
         2.2 a mapping file from possibly proprietary header names used in your CSV → to names used by this program. see sample mapping file below.
 
@@ -33,10 +33,10 @@ Your real mapping file should be placed under directory "input", and it must be 
   :data-files
     ; one or more input data files, expected under directory "input".
     ; to maintain traceability, the data within each file will be associated with the name provided by :data-group.
-    [ {:file "parties' results for test set batch 1 ― single Boris model - results.csv"
+    [ {:file "input-file-1.csv"
        :data-group :corpus}
 
-      {:file "gold and acquired ― test set batch 2 ― single Boris models - results.csv"
+      {:file "input-file-2.csv"
        :data-group :exa-corpus} ]
 
   ; mapping of column header names, to enable reading the gold and
