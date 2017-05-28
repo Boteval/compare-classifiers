@@ -11,7 +11,7 @@
     [org.boteval.nlueval.canonical :refer :all]))
 
 
-(defn evaluate-on-dimensions [{:keys [dimensions evaluation-fn evaluation-config-base]}]
+(defn evaluate-on-dimensions [trace-writer {:keys [dimensions evaluation-fn evaluation-config-base]}]
 
   " drives the supplied evaluation function across multiple provided dimensions,
     iterating through the cartesian product of all supplied dimensions' values.
@@ -53,7 +53,7 @@
                   evaluation-combo)
 
               evaluation-result
-                (evaluation-fn evaluation-config)
+                (evaluation-fn trace-writer evaluation-config)
 
               dimensions-column-data
                  (map

@@ -12,7 +12,8 @@
 
 (defn accuracy-at
 
-  [{:keys
+  [trace-writer
+   {:keys
      [objects-tagging
       gold
       test-tagging-group-name
@@ -61,6 +62,8 @@
          positives (count (filter :positive? row-evaluations))
          true-positives (count (filter :true-positive? row-evaluations))
          false-positives (count (filter :false-positive? row-evaluations))]
+
+         (trace-writer (list test-tag test-tagging-group-name n) row-evaluations)
 
           { :support positives
             :true-positives true-positives
