@@ -12,8 +12,7 @@
 
 (defn Godbole-accuracy
 
-  [trace-writer
-   {:keys
+  [{:keys
      [objects-tagging
       gold
       test-tagging-group-name
@@ -91,9 +90,9 @@
              (apply + (map :intersection-vs-union row-evaluations))
              (count row-evaluations))]
 
-        (trace-writer (list test-tagging-group-name n) row-evaluations)
-
-          { :recall recall
-            :precision precision
-            :accuracy accuracy }
+          { :trace row-evaluations
+            :result
+            { :recall recall
+              :precision precision
+              :accuracy accuracy }}
         )))

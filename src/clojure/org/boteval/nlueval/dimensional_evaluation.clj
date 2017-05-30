@@ -18,12 +18,12 @@
     at each evaluation, the arguments to the evaluation function are obtained from
     two sources: the supplied dimensions, and the evaluation config base.
 
-    accordingly, collectively, the evaluation config base, and the mappings
-    included with each dimension, should enable this function to pass all
-    arguments required by the evaluation function. "
+    collectively, the evaluation config base, and the mappings
+    included with each dimension, should enable this function
+    passing all arguments required by the target evaluation function. "
 
   (let
-    ;; cartesian product describing
+    ;; cartesian product prescribing all runs for the given evlauation function
     [evaluation-combos
       (apply combo/cartesian-product
          (map
@@ -34,7 +34,7 @@
                   { ; function to apply this dimension's value to the evaluation being dispatched
                     :evaluation-config-transform (partial (:evaluation-config-transform dim) dim-val)
 
-                    ; data for recording this dimensions value aside the result of its evaluation
+                    ; data for recording this dimension's value aside the result of its evaluation
                     :column-data
                       { (:name dim)
                         dim-val }})
@@ -42,7 +42,7 @@
                 (:vals dim)))
             dimensions))]
 
-      (map
+      (doall (map
         (fn configure-and-execute [evaluation-combo]
            (let
              [evaluation-config
@@ -52,15 +52,20 @@
                   evaluation-config-base
                   evaluation-combo)
 
-              evaluation-result
-                (evaluation-fn trace-writer evaluation-config)
+              evaluation
+                (evaluation-fn evaluation-config)
 
               dimensions-column-data
                  (map
                    #(:column-data %)
                    evaluation-combo)]
 
-              (apply merge evaluation-result dimensions-column-data)))
+              (trace-writer
+                (apply merge (dissoc evaluation-config :objects-tagging :gold) dimensions-column-data)
+                (:trace evaluation))
 
-        evaluation-combos)))
+              ; merge each evaluation result row, with the dimensions
+              ; that apply to it, to yield a fully descriptive data row
+              (apply merge (:result evaluation) dimensions-column-data)))
 
+        evaluation-combos))))
