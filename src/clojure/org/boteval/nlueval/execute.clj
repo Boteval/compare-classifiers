@@ -34,7 +34,7 @@
 
 
 (defn ^:private filter-data-origin-group [objects-tagging origin-name gold]
-  " filters to only objects that belong the given data group.
+  " filters to only objects that belong to the given data group.
     this function will be radically simplified once :object-data-group
     finds a better home in the collection hierarchy "
   (let [filtered
@@ -51,18 +51,22 @@
     filtered))
 
 
-(defn execute []
+(defn ready-data []
 
-  " drive evaluation on two evaluation methods sharing some of their dimensions "
+  " create a map with all we need to use the raw data "
 
   (let  ;; get all the base data ready
 
     [data (read-data)
 
      gold (:gold-set data)
+
      classifiers-under-test (:result-sets data)
 
-     gold-taggings (get-canonical-tagging data gold)
+     gold-taggings (doall (get-canonical-tagging data gold))
+
+     target-tag-set
+       (get-tag-set (flatten (map :taggings gold-taggings)))
 
      classifiers-under-test-taggings
        (flatten
@@ -71,9 +75,6 @@
      all-taggings
        (apply merge gold-taggings classifiers-under-test-taggings)
 
-     target-tag-set
-       (get-tag-set (flatten (map :taggings gold-taggings)))
-
      ; list of all objects for classification
      objects-tagging
        (group-by :object-id all-taggings)]
@@ -81,26 +82,44 @@
      (println "gold tagging contains" (count target-tag-set) "unique tags:")
      (cprint target-tag-set)
 
-     (let
-        [classifiers-dim
-           {:name :classifier
-            :vals classifiers-under-test
-            :evaluation-config-transform
-            (fn [current-dim-val evaluation-config] (assoc evaluation-config :test-tagging-group-name current-dim-val))}
+     (to-map
+       gold
+       gold-taggings
+       classifiers-under-test
+       target-tag-set
+       objects-tagging)))
 
-         tags-dim
+
+(defn dims
+  " build up our default dimensions "
+
+   [{:keys
+       [data
+        gold
+        gold-taggings
+        classifiers-under-test
+        target-tag-set
+        objects-tagging]}]
+
+        {:classifiers-dim
+          {:name :classifier
+           :vals classifiers-under-test
+           :evaluation-config-transform
+           (fn [current-dim-val evaluation-config] (assoc evaluation-config :test-tagging-group-name current-dim-val))}
+
+         :tags-dim
            {:name :tag
             :vals target-tag-set
             :evaluation-config-transform
             (fn [current-dim-val evaluation-config] (assoc evaluation-config :test-tag current-dim-val))}
 
-         at-n-dim
+         :at-n-dim
            {:name :n
             :vals [1 2 3]
             :evaluation-config-transform
             (fn [current-dim-val evaluation-config] (assoc evaluation-config :n current-dim-val))}
 
-         in-out-domain
+         :in-out-domain
            {:name :in-domain-only?
             :vals [:yes :no]
             :evaluation-config-transform
@@ -112,7 +131,7 @@
                       :yes (filter-in-domain current gold)
                       :no  current))))}
 
-         in-out-corpus
+         :in-out-corpus
            {:name :origin?
             :vals [:corpus :exa-corpus :all]
             :evaluation-config-transform
@@ -123,36 +142,53 @@
                    :objects-tagging (case current-dim-val
                       :corpus     (filter-data-origin-group current :corpus gold)
                       :exa-corpus (filter-data-origin-group current :exa-corpus gold)
-                      :all current))))}]
+                      :all current))))}})
 
-           (write-evaluation-result
-             "accuracy-at"
-             (evaluate-on-dimensions
-               (partial trace-write "accuracy-at")
-               { :evaluation-fn accuracy-at
-                 :evaluation-config-base
-                    {:objects-tagging objects-tagging
-                     :gold gold}
-                 :dimensions
-                    [in-out-corpus
-                     in-out-domain
-                     tags-dim
-                     at-n-dim
-                     classifiers-dim]}))
 
-           (write-evaluation-result
-             "Godbole-accuracy"
-             (evaluate-on-dimensions
-               (partial trace-write "Godbole-accuracy")
-               { :evaluation-fn Godbole-accuracy
-                 :evaluation-config-base
-                    {:objects-tagging objects-tagging
-                     :gold gold
-                     :n 3}
-                 :dimensions
-                    [in-out-corpus
-                     in-out-domain
-                     classifiers-dim]})))))
+
+
+(defn execute
+  [{:keys
+    [in-out-corpus
+     in-out-domain
+     tags-dim
+     at-n-dim
+     classifiers-dim]}
+
+   {:keys
+    [objects-tagging
+     gold]}]
+
+  " drive evaluation on two evaluation methods sharing some of their dimensions "
+
+     (write-evaluation-result
+       "accuracy-at"
+       (evaluate-on-dimensions
+         (partial trace-write "accuracy-at")
+         { :evaluation-fn accuracy-at
+           :evaluation-config-base
+           {:objects-tagging objects-tagging
+            :gold gold}
+           :dimensions
+           [in-out-corpus
+            in-out-domain
+            tags-dim
+            at-n-dim
+            classifiers-dim]}))
+
+     (write-evaluation-result
+       "Godbole-accuracy"
+       (evaluate-on-dimensions
+         (partial trace-write "Godbole-accuracy")
+         { :evaluation-fn Godbole-accuracy
+           :evaluation-config-base
+           {:objects-tagging objects-tagging
+            :gold gold
+            :n 3}
+           :dimensions
+           [in-out-corpus
+            in-out-domain
+            classifiers-dim]})))
 
 
 

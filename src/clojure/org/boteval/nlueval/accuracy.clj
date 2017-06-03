@@ -60,19 +60,29 @@
 
          positives (count (filter :positive? row-evaluations))
          true-positives (count (filter :true-positive? row-evaluations))
-         false-positives (count (filter :false-positive? row-evaluations))]
+         false-positives (count (filter :false-positive? row-evaluations))
+
+         precision (divide-or-undef
+                      true-positives
+                      (+ true-positives false-positives))
+
+         recall (divide-or-undef
+                   true-positives
+                   positives)
+
+         F1 (if
+              (and (number? precision) (number? recall))
+                (divide-or-undef
+                   (* 2 precision recall)
+                   (+ precision recall))
+                :undef)]
 
           { :trace row-evaluations
             :result
             { :support positives
               :true-positives true-positives
               :false-positives false-positives
-
-              :precision (divide-or-undef
-                            true-positives
-                            (+ true-positives false-positives))
-
-              :recall (divide-or-undef
-                         true-positives
-                         positives) }}
+              :precision precision
+              :recall recall
+              :F1 F1 }}
         )))

@@ -1,5 +1,6 @@
 (ns org.boteval.nlueval.util
   (:require
+    [clojure.test :refer :all]
     [clojure.pprint :refer [pprint]]
     [clojure.data.csv :as csv]
     [clojure.java.io :as io]
@@ -23,13 +24,13 @@
 
 (defn divide-or-undef [a b]
   " divides a by b, or returns :undef if b is zero "
-  (if (= b 0) :undef
+  (if (== b 0) :undef ; type independant numeric equality check
     (float (/ a b))))
 
 
 (defn divide-or-default [a b default]
   " divides a by b, or returns default value if b is zero "
-  (if (= b 0) default
+  (if (== b 0) default ; type independant numeric equality check
     (float (/ a b))))
 
 
@@ -85,3 +86,33 @@
         file (apply io/file path)]
     (io/make-parents file)
     (spit file (last args))))
+
+
+(defmacro symbol-to-key-pair [value]
+  `{(keyword (quote ~value)) ~value})
+
+(def foo "a")
+(def bar "b")
+(symbol-to-key-pair foo) ; yields {:foo "a"}
+(symbol-to-key-pair bar) ; yields {b:bar "b"}
+
+(with-test
+  (defmacro to-map [& vars]
+    " returns a map consisting of each supplied var turned into a key-value pair,
+      where the key is the var name and the value is the var's value. useful for
+      stuffing a bunch of vars into a map "
+    `(merge
+       ~@(map
+           (fn [arg] {(keyword (name arg)) arg})
+           vars)))
+
+  (is (=
+        (let
+          [foo 1
+           bar (* foo 2)]
+          (to-map foo bar))
+        {:foo 1 :bar 2})))
+
+
+
+

@@ -16,10 +16,9 @@
     default
     value))
 
-(def ^:private filtered-tags (atom (list)))
-
 (defn ^:private get-canonical-for-row
-  [valid-classes-set
+  [accumulate-filtered-out
+   valid-classes-set
    object-id-mapping
    tagging-group-mappings
    tagging-group-name
@@ -44,77 +43,87 @@
        (if (contains? allowed-classes value)
           value
           (do
-             (swap! filtered-tags conj value)
-             nil)))]
+             (if-not (= value nil) (accumulate-filtered-out value))
+             nil)))
 
-   (let [result-set-mapping (val (first (first (filter #(= tagging-group-name (key (first %))) tagging-group-mappings))))]
-     (let [raw-result-set
-             (hash-map
+     result-set-mapping
+       (val (first (first (filter #(= tagging-group-name (key (first %))) tagging-group-mappings))))
 
-               :tagging-group-name tagging-group-name
+     raw-result-set
+       (hash-map
 
-               :object-id (object-id-mapping row)
+         :tagging-group-name tagging-group-name
 
-               :object-data-origin (:data-group row) ; TODO: sticking this here is the number one hack of this code base.
-                                                     ;       to clean this up, make the objects-tagging collection a
-                                                     ;       collection where each element is a keyed map, storing
-                                                     ;       this bit of information at the object level there.
+         :object-id (object-id-mapping row)
 
-               :taggings
-                 (map
-                   (fn [tag-map]
-                     (apply hash-map
-                            (mapcat
-                              (fn [[canonical-tag header]]
-                                [canonical-tag
-                                 (case canonical-tag
+         :object-data-origin (:data-group row) ; TODO: sticking this here is the number one hack of this code base.
+         ;       to clean this up, make the objects-tagging collection a
+         ;       collection where each element is a keyed map, storing
+         ;       this bit of information at the object level there.
 
-                                   :tag (let
-                                          [value (get row header)]
-                                          (if valid-classes-set
-                                            (filtered-get-tag-value value valid-classes-set)
-                                            (value-or-default value nil)))
+         :taggings
+           (doall (map
+             (fn [tag-map]
+               (apply hash-map
+                      (mapcat
+                        (fn [[canonical-tag header]]
+                          [canonical-tag
+                           (case canonical-tag
 
-                                   :confidence (let
-                                                 [value
-                                                  (if (keyword? header)
-                                                    (get row header)
-                                                    header)]
-                                                 (as-float (value-or-default value 1)))
+                             :tag (let
+                                    [value (get row header)]
+                                    (let [value (value-or-default value nil)]
+                                      (if valid-classes-set
+                                        (filtered-get-tag-value value valid-classes-set)
+                                        value)))
 
-                                   :confidence-scale (as-float header)) ])
+                             :confidence (let
+                                           [value
+                                            (if (keyword? header)
+                                              (get row header)
+                                              header)]
+                                           (as-float (value-or-default value 1)))
 
-                              tag-map)))
-                   result-set-mapping))]
+                             :confidence-scale (as-float header)) ])
 
-           (update raw-result-set :taggings
-             (fn filter-and-normalize [taggings]
-               (map
-                 (fn [tagging] ; normalizing confidence by the confidence scale of the tuple
-                   (update
-                      tagging :confidence
-                      #(/ % (:confidence-scale tagging))))
+                        tag-map)))
+             result-set-mapping)))]
 
-                 (filter #(some? (:tag %)) taggings) ; filtering out nil taggings!!
-              )))))))
+    (update raw-result-set :taggings
+       (fn filter-and-normalize [taggings]
+          (map
+              (fn [tagging] ; normalizing confidence by the confidence scale of the tuple
+                  (update
+                    tagging :confidence
+                    #(/ % (:confidence-scale tagging))))
+
+                (filter #(some? (:tag %)) taggings) ; filtering out nil taggings!!
+                )))))
 
 
 (defn get-canonical-tagging
   [{:keys [data object-id-mapping valid-classes-set tagging-group-mappings]} tagging-group-name]
   " get taggings per object-id, for the given tagging group name "
   (let
-    [result
-      (doall (map
-        (partial get-canonical-for-row
-                   valid-classes-set
-                   object-id-mapping
-                   tagging-group-mappings
-                   tagging-group-name)
-        data))]
+    [filtered-out-tags (atom (list))
+     accumulate-filtered-out
+       (fn [value]  ; we accumulate as a "side-effect" here rather than rewrite it all
+          (swap! filtered-out-tags conj value))
 
-    (if (not-empty @filtered-tags) (do
-      (println (count @filtered-tags) "tags outside the allowed tag list are found in result set" tagging-group-name "and will be ignored:")
-      (cprint (frequencies @filtered-tags))))
+     result
+       (doall (map
+         (partial get-canonical-for-row
+                    accumulate-filtered-out
+                    valid-classes-set
+                    object-id-mapping
+                    tagging-group-mappings
+                    tagging-group-name)
+         data))]
+
+
+    (if (not-empty @filtered-out-tags) (do
+      (println (count @filtered-out-tags ) "tags outside the allowed tag list are found in tagging set" tagging-group-name "and will be ignored:")
+      (cprint (frequencies @filtered-out-tags))))
 
     result))
 

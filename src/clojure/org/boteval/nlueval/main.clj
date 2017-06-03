@@ -2,5 +2,8 @@
   (:require [org.boteval.nlueval.execute :refer :all]))
 
 (defn -main []
-  (execute))
+  (let [ready-data (ready-data)]
+    (execute
+      (dims ready-data)
+      ready-data)))
 
