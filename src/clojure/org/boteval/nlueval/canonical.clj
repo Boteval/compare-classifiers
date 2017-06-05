@@ -43,7 +43,7 @@
        (if (contains? allowed-classes value)
           value
           (do
-             (if-not (= value nil) (accumulate-filtered-out value))
+             (if (not= value nil) (accumulate-filtered-out value))
              nil)))
 
      result-set-mapping

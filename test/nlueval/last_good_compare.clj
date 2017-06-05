@@ -5,6 +5,7 @@
 
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
+            [org.boteval.nlueval.input.ready :refer :all]
             [org.boteval.nlueval.execute :refer :all]))
 
 (deftest same-as-last-good

@@ -64,7 +64,7 @@
       (throw (Exception. (str "a unique match is expected but multiple matches are found in the collection:" (capped! matches)))))))
 
 
-(defn val=! [map key expected-value]
+(defn map-key-equals [map key expected-value]
   " checks whether the value of the given key equals the expected value.
     if the given key does not exists, throws an exception. "
   (= (get! map key) expected-value))

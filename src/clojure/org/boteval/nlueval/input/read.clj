@@ -1,4 +1,4 @@
-(ns org.boteval.nlueval.input
+(ns org.boteval.nlueval.input.read
   (:require
      [clojure.pprint :refer [pprint]]
      [puget.printer :refer [cprint]]

@@ -7,28 +7,37 @@
     [clojure.data.csv :as csv]
     [clojure.java.io :as io]
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
-    [org.boteval.nlueval.input :refer :all]
+    [org.boteval.nlueval.input.ready :refer :all]
     [org.boteval.nlueval.output :refer :all]
-    [org.boteval.nlueval.canonical :refer :all]
     [org.boteval.nlueval.dimensional-evaluation :refer :all]
     [org.boteval.nlueval.accuracy  :refer :all]
     [org.boteval.nlueval.accuracy2 :refer :all]))
 
 
-(defn ^:private filter-in-domain [objects-tagging gold]
-  " filters to only objects which have at least one gold label to them "
-  (let [filtered
-     (filter
-        (fn [object-tagging]
-           (let
-             [object-id (key object-tagging)
-              taggings-groups (val object-tagging)
-              gold-taggings (:taggings (get-single #(val=! % :tagging-group-name gold) taggings-groups))
-              gold-tags (set (map #(:tag %) gold-taggings))]
+(defn ^:private filter-domain-ness [objects-tagging gold in-or-out]
+  " filters to only objects which have at least one gold label to them ―
+    which we aptly regard as inside the domain (of the classification task) v.s.
+    objects which have no gold tags, and thus, considered outside of the domain
+    of the classification. this is useful when the classification domain is
+    only a subset of the overall input domain "
+  (let
+    [predicate
+       (case in-or-out
+         :in  not-empty
+         :out empty?)
 
-             (not-empty gold-tags)))
+     filtered
+       (filter
+          (fn [object-tagging]
+             (let
+               [object-id (key object-tagging)
+                taggings-groups (val object-tagging)
+                gold-taggings (:taggings (get-single #(map-key-equals % :tagging-group-name gold) taggings-groups))
+                gold-tags (set (map :tag gold-taggings))]
 
-        objects-tagging)]
+               (predicate gold-tags)))
+
+          objects-tagging)]
 
     filtered))
 
@@ -42,52 +51,13 @@
         (fn [object-tagging]
            (let
              [taggings-groups (val object-tagging)
-              object-data-origin (:object-data-origin (get-single #(val=! % :tagging-group-name gold) taggings-groups))]
+              object-data-origin (:object-data-origin (get-single #(map-key-equals % :tagging-group-name gold) taggings-groups))]
 
              (= object-data-origin origin-name)))
 
         objects-tagging)]
 
     filtered))
-
-
-(defn ready-data []
-
-  " create a map with all we need to use the raw data "
-
-  (let  ;; get all the base data ready
-
-    [data (read-data)
-
-     gold (:gold-set data)
-
-     classifiers-under-test (:result-sets data)
-
-     gold-taggings (doall (get-canonical-tagging data gold))
-
-     target-tag-set
-       (get-tag-set (flatten (map :taggings gold-taggings)))
-
-     classifiers-under-test-taggings
-       (flatten
-         (map (partial get-canonical-tagging data) classifiers-under-test))
-
-     all-taggings
-       (apply merge gold-taggings classifiers-under-test-taggings)
-
-     ; list of all objects for classification
-     objects-tagging
-       (group-by :object-id all-taggings)]
-
-     (println "gold tagging contains" (count target-tag-set) "unique tags:")
-     (cprint target-tag-set)
-
-     (to-map
-       gold
-       gold-taggings
-       classifiers-under-test
-       target-tag-set
-       objects-tagging)))
 
 
 (defn dims
@@ -120,16 +90,17 @@
             (fn [current-dim-val evaluation-config] (assoc evaluation-config :n current-dim-val))}
 
          :in-out-domain
-           {:name :in-domain-only?
-            :vals [:yes :no]
+           {:name :domain-ness?
+            :vals [:domain :exa-domain :all]
             :evaluation-config-transform
             (fn [current-dim-val evaluation-config] ;; must base on current to maintain commutativity
                (let [current (:objects-tagging evaluation-config)]
                  (assoc
                    evaluation-config
                    :objects-tagging (case current-dim-val
-                      :yes (filter-in-domain current gold)
-                      :no  current))))}
+                      :domain (filter-domain-ness current gold :in)
+                      :exa-domain (filter-domain-ness current gold :out)
+                      :all current))))}
 
          :in-out-corpus
            {:name :origin?

@@ -36,10 +36,10 @@
            (let [object-id (key object-tagging)
                  taggings-groups (val object-tagging)
 
-                 gold-taggings (:taggings (get-single #(val=! % :tagging-group-name gold) taggings-groups))
+                 gold-taggings (:taggings (get-single #(map-key-equals % :tagging-group-name gold) taggings-groups))
                  gold-tags (set (map #(:tag %) (take n gold-taggings)))
 
-                 test-taggings (:taggings (get-single #(val=! % :tagging-group-name test-tagging-group-name) taggings-groups))
+                 test-taggings (:taggings (get-single #(map-key-equals % :tagging-group-name test-tagging-group-name) taggings-groups))
                  test-tags (set (map #(:tag %) (take n test-taggings)))
 
                  intersection-set (intersection gold-tags test-tags); the correctly predicted

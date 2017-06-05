@@ -7,7 +7,6 @@
     [clojure.java.io :as io]
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
     [clojure.math.combinatorics :as combo]
-    [org.boteval.nlueval.input :refer :all]
     [org.boteval.nlueval.canonical :refer :all]))
 
 
