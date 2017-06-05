@@ -52,7 +52,9 @@
 
 
 (defn write-evaluation-result [evaluation-name evaluation]
+
   " outputs an evaluation result "
+
   (let
     [path (list "output" evaluation-name)
      file-with-parents (partial file-with-parents path)]

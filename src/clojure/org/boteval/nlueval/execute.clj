@@ -10,8 +10,8 @@
     [org.boteval.nlueval.input.ready :refer :all]
     [org.boteval.nlueval.output :refer :all]
     [org.boteval.nlueval.dimensional-evaluation :refer :all]
-    [org.boteval.nlueval.accuracy  :refer :all]
-    [org.boteval.nlueval.accuracy2 :refer :all]))
+    [org.boteval.nlueval.evaluators.per-tag  :refer :all]
+    [org.boteval.nlueval.evaluators.accuracy :refer :all]))
 
 
 (defn ^:private filter-domain-ness [objects-tagging gold in-or-out]

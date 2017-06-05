@@ -1,4 +1,4 @@
-(ns org.boteval.nlueval.accuracy2
+(ns org.boteval.nlueval.evaluators.accuracy
   (:require
       [org.boteval.nlueval.util :refer :all]
       [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
