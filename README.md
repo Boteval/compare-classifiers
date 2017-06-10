@@ -21,8 +21,7 @@ Note that outputs will be generated under the directory "output".
 
 ## Sample Mapping file
 
-The following sample demonstrates how the required mapping file informs the program as to the semantics of the input csv.
-Your real mapping file should be placed under directory "input", and it must be called `mapping.edn`.
+The following sample demonstrates how the required mapping file informs the program as to the semantics of the input csv files, as well as additional configuration semantics. Your real mapping file should be placed under directory "input", and it must be called `mapping.edn`.
 
 ```clojure
 ;;;
