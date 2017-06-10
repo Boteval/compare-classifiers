@@ -9,7 +9,7 @@
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
     [org.boteval.nlueval.input.ready :refer :all]
     [org.boteval.nlueval.output :refer :all]
-    [org.boteval.nlueval.evaluate-on-dimensions :refer :all]
+    [org.boteval.nlueval.evaluation.evaluate-on-dimensions :refer :all]
     [org.boteval.nlueval.evaluators.per-tag  :refer :all]
     [org.boteval.nlueval.evaluators.accuracy :refer :all]))
 

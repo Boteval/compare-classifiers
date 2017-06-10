@@ -1,4 +1,4 @@
-(ns org.boteval.nlueval.nlp
+(ns org.boteval.nlueval.nlp-util
   " faint glimpses of nlp that shouldn't really belong here "
   (:require
     [clojure.test :refer :all]))

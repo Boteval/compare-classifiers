@@ -1,10 +1,10 @@
-(ns org.boteval.nlueval.evaluators.map-reduce-evaluate
+(ns org.boteval.nlueval.evaluation.map-reduce-evaluate
   (:require
       [org.boteval.nlueval.util :refer :all]
       [clojure.pprint :refer [pprint]]
       [puget.printer :refer [cprint]]
       [clojure.inspector :as inspect :refer [inspect-tree]]
-      [org.boteval.nlueval.evaluators.helpers :refer :all]))
+      [org.boteval.nlueval.evaluation.helpers :refer :all]))
 
 (defn map-reduce-evaluate [{:keys [mapper reducer]} evaluation-config]
   {:pre [(is-function? mapper) (is-function? reducer)]}

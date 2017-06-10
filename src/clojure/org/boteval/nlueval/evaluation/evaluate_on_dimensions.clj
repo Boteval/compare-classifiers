@@ -1,4 +1,4 @@
-(ns org.boteval.nlueval.evaluate-on-dimensions
+(ns org.boteval.nlueval.evaluation.evaluate-on-dimensions
   (:require
     [clojure.pprint :refer [pprint]]
     [puget.printer :refer [cprint]]
@@ -8,7 +8,7 @@
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
     [clojure.math.combinatorics :as combo]
     [org.boteval.nlueval.canonical :refer :all]
-    [org.boteval.nlueval.evaluators.map-reduce-evaluate :refer :all]))
+    [org.boteval.nlueval.evaluation.map-reduce-evaluate :refer :all]))
 
 
 (defn evaluate-on-dimensions [trace-writer {:keys [dimensions evaluator-spec evaluation-config-base]}]

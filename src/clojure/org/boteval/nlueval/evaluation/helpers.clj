@@ -1,4 +1,4 @@
-(ns org.boteval.nlueval.evaluators.helpers
+(ns org.boteval.nlueval.evaluation.helpers
   (:require
       [org.boteval.nlueval.util :refer :all]
       [cheshire.core :refer [generate-string] :rename {generate-string to-json}]

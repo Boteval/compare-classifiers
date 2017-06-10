@@ -7,7 +7,6 @@
       [clojure.set :refer [union]]
       [clojure.pprint :refer [pprint]]
       [puget.printer :refer [cprint]]
-      [org.boteval.nlueval.evaluators.helpers :refer :all]
       [clojure.inspector :as inspect :refer [inspect-tree]]))
 
 
