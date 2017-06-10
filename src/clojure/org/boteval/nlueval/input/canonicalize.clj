@@ -1,4 +1,4 @@
-(ns org.boteval.nlueval.canonical
+(ns org.boteval.nlueval.input.canonicalize
   (:require
       [org.boteval.nlueval.util :refer :all]
       [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
@@ -103,7 +103,9 @@
 
 (defn get-canonical-tagging
   [{:keys [data object-id-mapping valid-classes-set tagging-group-mappings]} tagging-group-name]
-  " get taggings per object-id, for the given tagging group name "
+
+  " gets taggings per object-id, for the given tagging group name "
+
   (let
     [filtered-out-tags (atom (list))
      accumulate-filtered-out

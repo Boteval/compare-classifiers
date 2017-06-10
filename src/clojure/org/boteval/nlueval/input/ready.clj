@@ -8,7 +8,7 @@
     [clojure.java.io :as io]
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
     [org.boteval.nlueval.input.read :refer :all]
-    [org.boteval.nlueval.canonical :refer :all]))
+    [org.boteval.nlueval.input.canonicalize :refer :all]))
 
 
 (defn ready-data []

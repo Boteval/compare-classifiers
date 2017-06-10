@@ -7,7 +7,6 @@
     [clojure.java.io :as io]
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
     [clojure.math.combinatorics :as combo]
-    [org.boteval.nlueval.canonical :refer :all]
     [org.boteval.nlueval.evaluation.map-reduce-evaluate :refer :all]))
 
 
@@ -42,7 +41,7 @@
                 (:vals dim)))
             dimensions))]
 
-      (doall (map
+      (doall (pmap
         (fn configure-and-execute [evaluation-combo]
            (let
              [evaluation-config
