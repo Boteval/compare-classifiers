@@ -4,6 +4,8 @@
     [clojure.data.csv :as csv]
     [clojure.java.io :as io]
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
+    [puget.printer :refer [cprint]]
+    [clojure.inspector :as inspect :refer [inspect-tree]]
     [org.boteval.nlueval.util :refer :all]
 ))
 
@@ -55,12 +57,17 @@
 
   " outputs an evaluation result "
 
+  (println "writing evaluation result")
+
   (let
     [path (list "output" evaluation-name)
      file-with-parents (partial file-with-parents path)]
 
+    (println evaluation-name "evaluation output comprises" (count evaluation) "data rows")
+
     ;; writing the raw results to equivalent edn and json files
     (spit (file-with-parents "out.edn") (with-out-str (pprint evaluation))) ; note! any downstream println will go to the file too
+
     (spit (file-with-parents "out.json") (to-json evaluation {:pretty true :escape-non-ascii false}))
 
     ;; writing the csv results
@@ -68,6 +75,6 @@
     (println "outputs have been written to output directory" (.getPath (apply io/file path)))
 
     #_(do
-    (println "launching swing output viewer..")
-    (inspect/inspect-tree evaluation))))
+        (println "launching swing output viewer..")
+        (inspect/inspect-tree evaluation))))
 

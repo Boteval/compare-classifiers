@@ -9,7 +9,7 @@
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
     [org.boteval.nlueval.input.ready :refer :all]
     [org.boteval.nlueval.output :refer :all]
-    [org.boteval.nlueval.dimensional-evaluation :refer :all]
+    [org.boteval.nlueval.evaluate-on-dimensions :refer :all]
     [org.boteval.nlueval.evaluators.per-tag  :refer :all]
     [org.boteval.nlueval.evaluators.accuracy :refer :all]))
 
@@ -89,6 +89,12 @@
             :evaluation-config-transform
             (fn [current-dim-val evaluation-config] (assoc evaluation-config :n current-dim-val))}
 
+         :cutoff
+           {:name :cutoff
+            :vals [(range 0 1 0.1)]
+            :evaluation-config-transform
+            (fn [current-dim-val evaluation-config] (assoc evaluation-config :cutoff current-dim-val))}
+
          :in-out-domain
            {:name :domain-ness?
             :vals [:domain :exa-domain :all]
@@ -136,30 +142,30 @@
        "accuracy-at"
        (evaluate-on-dimensions
          (partial trace-write "accuracy-at")
-         { :evaluation-fn accuracy-at
+         { :evaluator-spec accuracy-at
            :evaluation-config-base
-           {:objects-tagging objects-tagging
-            :gold gold}
+             {:objects-tagging objects-tagging
+              :gold gold}
            :dimensions
-           [in-out-corpus
-            in-out-domain
-            tags-dim
-            at-n-dim
-            classifiers-dim]}))
+             [in-out-corpus
+              in-out-domain
+              tags-dim
+              at-n-dim
+              classifiers-dim]}))
 
      (write-evaluation-result
        "Godbole-accuracy"
        (evaluate-on-dimensions
          (partial trace-write "Godbole-accuracy")
-         { :evaluation-fn Godbole-accuracy
+         { :evaluator-spec Godbole-accuracy
            :evaluation-config-base
-           {:objects-tagging objects-tagging
-            :gold gold
-            :n 3}
+             {:objects-tagging objects-tagging
+              :gold gold
+              :n 3}
            :dimensions
-           [in-out-corpus
-            in-out-domain
-            classifiers-dim]})))
+             [in-out-corpus
+              in-out-domain
+              classifiers-dim]})))
 
 
 

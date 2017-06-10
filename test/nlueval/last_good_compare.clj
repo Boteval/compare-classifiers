@@ -1,30 +1,52 @@
 (ns nlueval.last-good-compare
 
-  " tests whether current output is identical to previously stashed output directory.
-    useful when validating through a specific dataset, which should not be part of the repo. "
+  " tests whether current output is identical to a previously stashed output directory dubbed 'last good'.
+    if no previously stashed output is found ― does nothing and only emits a message to stdout. "
 
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
+            [puget.printer :refer [cprint]]
+            [clojure.inspector :as inspect :refer [inspect-tree]]
+            [org.boteval.nlueval.util :refer :all]
             [org.boteval.nlueval.input.ready :refer :all]
             [org.boteval.nlueval.execute :refer :all]))
 
 (deftest same-as-last-good
 
-  (let [last-good (io/file "output" "last-good" "accuracy-at" "out.edn")]
+  (let [targets
+          [ {:name "accuracy-at"
+             :last-good-path-seq '("output" "last-good" "accuracy-at" "out.edn")
+             :current-path-seq   '("output" "accuracy-at" "out.edn")}
 
-    (if (.exists last-good)
-      (do
-        (let [ready-data (ready-data)]
-          (execute
-            (dims ready-data)
-            ready-data))
+            {:name "Godbole-accuracy"
+             :last-good-path-seq '("output" "last-good" "Godbole-accuracy" "out.edn")
+             :current-path-seq   '("output" "Godbole-accuracy" "out.edn")}]]
 
-        (let
-          [current (slurp (io/file "output" "accuracy-at" "out.edn"))
-           last-good (slurp last-good)]
-          (binding [*print-length* 1]
-            (is (= current last-good) "current outupt is different than last-good"))))
+    (let [last-goods (map get-file-object (map :last-good-path-seq targets))]
 
-      (println "info: to test against a 'last good' output, a copy of 'output' is used from 'output/last-good'"))))
+      (if (every? #(.exists %) last-goods)
+        (time (do
+          (let [ready-data (ready-data)]
+            (execute
+              (dims ready-data)
+              ready-data))
 
+          (doall
+            (map
+              (fn comparer [{:keys [name current-path-seq last-good-path-seq]}]
+                (let
+                  [current-file   (get-file-object current-path-seq)
+                   last-good-file (get-file-object last-good-path-seq)
+                   current        (slurp current-file)
+                   last-good      (slurp last-good-file)]
 
+                  (binding [*print-length* 0] ; because the default output of `is` is ill-suited, user should refer to the named files and/or diff them with a diff tool
+                    (is (= current last-good)
+                        (str "current output data is different than last-good for " name ",\n"
+                             "compared output data files: " (.getPath current-file) ", " (.getPath last-good-file) "\n"
+                             "in case you assumed no change to the output from prior runs, this test refutes your assumption,\n"
+                             "and otherwise it might be a good time to pin down a last good output.")))))
+
+              targets))))
+
+      (println "info: to test for changes from the 'last good' output data, a last good output can be placed inside 'output/last-good', by simply copying the contents of the output directory there.")))))

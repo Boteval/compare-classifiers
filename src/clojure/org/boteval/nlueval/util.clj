@@ -91,10 +91,6 @@
 (defmacro symbol-to-key-pair [value]
   `{(keyword (quote ~value)) ~value})
 
-(def foo "a")
-(def bar "b")
-(symbol-to-key-pair foo) ; yields {:foo "a"}
-(symbol-to-key-pair bar) ; yields {b:bar "b"}
 
 (with-test
   (defmacro to-map [& vars]
@@ -114,5 +110,18 @@
         {:foo 1 :bar 2})))
 
 
+(defmacro is-function? [x]
+  " just pulls in clojure.test's function? into scope "
+  `(function? ~x))
 
 
+(defn third [x]
+  " returns third element of sequence "
+  (nth x 2))
+
+
+(defn get-file-object
+  [path-seq]
+  {:pre [(seq? path-seq) (every? string? path-seq)]}
+  " gets a java file object from a path sequence "
+  (apply io/file path-seq))

@@ -1,4 +1,4 @@
-(ns org.boteval.nlueval.dimensional-evaluation
+(ns org.boteval.nlueval.evaluate-on-dimensions
   (:require
     [clojure.pprint :refer [pprint]]
     [puget.printer :refer [cprint]]
@@ -7,10 +7,11 @@
     [clojure.java.io :as io]
     [cheshire.core :refer [generate-string] :rename {generate-string to-json}]
     [clojure.math.combinatorics :as combo]
-    [org.boteval.nlueval.canonical :refer :all]))
+    [org.boteval.nlueval.canonical :refer :all]
+    [org.boteval.nlueval.evaluators.map-reduce-evaluate :refer :all]))
 
 
-(defn evaluate-on-dimensions [trace-writer {:keys [dimensions evaluation-fn evaluation-config-base]}]
+(defn evaluate-on-dimensions [trace-writer {:keys [dimensions evaluator-spec evaluation-config-base]}]
 
   " drives the supplied evaluation function across multiple provided dimensions,
     iterating through the cartesian product of all supplied dimensions' values.
@@ -52,16 +53,19 @@
                   evaluation-combo)
 
               evaluation
-                (evaluation-fn evaluation-config)
+                (map-reduce-evaluate evaluator-spec evaluation-config)
 
               dimensions-column-data
                  (map
-                   #(:column-data %)
+                   :column-data
                    evaluation-combo)]
 
               (trace-writer
                 (apply merge (dissoc evaluation-config :objects-tagging :gold) dimensions-column-data)
                 (:trace evaluation))
+
+              #_(println ((juxt keys count)
+                 (apply merge (:result evaluation) dimensions-column-data)))
 
               ; merge each evaluation result row, with the dimensions
               ; that apply to it, to yield a fully descriptive data row

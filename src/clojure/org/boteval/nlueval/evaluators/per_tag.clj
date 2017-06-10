@@ -7,58 +7,31 @@
       [clojure.set :refer [union]]
       [clojure.pprint :refer [pprint]]
       [puget.printer :refer [cprint]]
+      [org.boteval.nlueval.evaluators.helpers :refer :all]
       [clojure.inspector :as inspect :refer [inspect-tree]]))
 
 
-(defn accuracy-at
+(def accuracy-at
 
-  [{:keys
-     [objects-tagging
-      gold
-      test-tagging-group-name
-      test-tag
-      n]}]
-
-  {:pre
-    [(keyword? gold)
-     (keyword? test-tagging-group-name)
-     (string? test-tag)
-     (number? n)]}
-
-  " calculates simple accuracy at n for the provided test-tag, over the provided objects
+  " prescribes calculation of simple accuracy at n for the provided test-tag, over the provided objects
 
     see also https://www.wikiwand.com/en/Precision_and_recall#/Precision "
 
-  (letfn
-    [(row-evaluation
-       [object-tagging]
-           (let [object-id (key object-tagging)
-                 taggings-groups (val object-tagging)
+  { :mapper (fn mapper [gold-tags test-tags {:keys [test-tag]}]
+       (let
+         [positive?  (contains? gold-tags test-tag)
+          predicted? (contains? test-tags test-tag)
+          true-positive?  (and positive? predicted?)
+          false-positive? (and (not positive?) predicted?)]
 
-                 gold-taggings (:taggings (get-single #(map-key-equals % :tagging-group-name gold) taggings-groups))
-                 gold-tags (set (map #(:tag %) gold-taggings))
+         { :positive? positive?
+           :predicted? predicted?
+           :true-positive? true-positive?
+           :false-positive? false-positive? }))
 
-                 test-taggings (:taggings (get-single #(map-key-equals % :tagging-group-name test-tagging-group-name) taggings-groups))
-                 test-tags (set (map #(:tag %) (take n test-taggings)))
-
-                 positive?  (contains? gold-tags test-tag)
-                 predicted? (contains? test-tags test-tag)
-                 true-positive?  (and positive? predicted?)
-                 false-positive? (and (not positive?) predicted?)]
-
-             { :object-id object-id
-               :gold-tags gold-tags
-               :test-tags test-tags
-
-               :positive? positive?
-               :predicted? predicted?
-               :true-positive? true-positive?
-               :false-positive? false-positive? }))]
-
+    :reducer (fn reducer [row-evaluations]
       (let
-        [row-evaluations (map row-evaluation objects-tagging)
-
-         positives (count (filter :positive? row-evaluations))
+        [positives (count (filter :positive? row-evaluations))
          true-positives (count (filter :true-positive? row-evaluations))
          false-positives (count (filter :false-positive? row-evaluations))
 
@@ -77,12 +50,10 @@
                    (+ precision recall))
                 :undef)]
 
-          { :trace row-evaluations
-            :result
-            { :support positives
-              :true-positives true-positives
-              :false-positives false-positives
-              :precision precision
-              :recall recall
-              :F1 F1 }}
-        )))
+        { :support positives
+          :true-positives true-positives
+          :false-positives false-positives
+          :precision precision
+          :recall recall
+          :F1 F1 }
+        ))})
