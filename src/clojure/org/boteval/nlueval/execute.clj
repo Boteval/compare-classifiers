@@ -91,7 +91,7 @@
 
          :cutoff
            {:name :cutoff
-            :vals [(range 0 1 0.1)]
+            :vals (range 0 1 0.02)
             :evaluation-config-transform
             (fn [current-dim-val evaluation-config] (assoc evaluation-config :cutoff current-dim-val))}
 
@@ -130,7 +130,8 @@
      in-out-domain
      tags-dim
      at-n-dim
-     classifiers-dim]}
+     classifiers-dim
+     cutoff]}
 
    {:keys
     [objects-tagging
@@ -138,7 +139,7 @@
 
   " drive evaluation on two evaluation methods sharing some of their dimensions "
 
-     (write-evaluation-result
+     #_(write-evaluation-result
        "accuracy-at"
        (evaluate-on-dimensions
          (partial trace-write "accuracy-at")
@@ -165,7 +166,8 @@
            :dimensions
              [in-out-corpus
               in-out-domain
-              classifiers-dim]})))
+              classifiers-dim
+              cutoff]})))
 
 
 
