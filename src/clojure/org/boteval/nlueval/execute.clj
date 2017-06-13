@@ -15,11 +15,13 @@
 
 
 (defn ^:private filter-domain-ness [objects-tagging gold in-or-out]
+
   " filters to only objects which have at least one gold label to them ―
     which we aptly regard as inside the domain (of the classification task) v.s.
     objects which have no gold tags, and thus, considered outside of the domain
     of the classification. this is useful when the classification domain is
     only a subset of the overall input domain "
+
   (let
     [predicate
        (case in-or-out
@@ -43,9 +45,11 @@
 
 
 (defn ^:private filter-data-origin-group [objects-tagging origin-name gold]
+
   " filters to only objects that belong to the given data group.
     this function will be radically simplified once :object-data-group
     finds a better home in the collection hierarchy "
+
   (let [filtered
      (filter
         (fn [object-tagging]
@@ -61,6 +65,7 @@
 
 
 (defn dims
+
   " build up our default dimensions "
 
    [{:keys
@@ -139,7 +144,7 @@
 
   " drive evaluation on two evaluation methods sharing some of their dimensions "
 
-     #_(write-evaluation-result
+     (write-evaluation-result
        "accuracy-at"
        (evaluate-on-dimensions
          (partial trace-write "accuracy-at")
@@ -152,7 +157,8 @@
               in-out-domain
               tags-dim
               at-n-dim
-              classifiers-dim]}))
+              classifiers-dim
+              cutoff]}))
 
      (write-evaluation-result
        "Godbole-accuracy"

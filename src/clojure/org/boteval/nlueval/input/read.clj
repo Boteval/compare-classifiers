@@ -5,6 +5,7 @@
      [clojure.inspector :as inspect :refer [inspect-tree]]
      [clojure.data.csv :as csv]
      [clojure.java.io :as io]
+     [org.boteval.nlueval.util :refer :all]
      [clojure.set :refer :all]))
 
 
@@ -60,8 +61,7 @@
                   (not (apply = (val %))) ; are duplicates for the current id identical?
                     (do
                       (println (str
-                         "warning: could not de-duplicate ― for the same id " (key %) ", some of the following data rows defer in content:\n\n"
-                         (clojure.string/join "\n\n" (val %))))
+                         "warning: could not de-duplicate ― for the same id " (key %) ", some data rows defer in content"))
                       (throw (Exception. "\n\n― given the above, this dataset is invalid and thusly rejected!" ))))
              duplicates))
 
@@ -93,14 +93,16 @@
 
 
 
-(defn read-data []
+(defn read-data [config-label]
 
   " loads the input data and its mapping "
 
   (let [relative-path "input" file-name "mapping.edn"
         config-map (read-string (slurp (io/file relative-path file-name)))]
 
-    (println (str "input mappings loaded from " file-name " under the " relative-path " directory"))
+    (println (str "input mappings loaded from " file-name " under the " relative-path " directory")) ; TODO: move upwords some place where it is called only once
+
+    (println "processing" config-label)
 
     (let
       [csvs
@@ -111,7 +113,7 @@
                 (println "reading data file" (:file data-file))
                 { :data-group (:data-group data-file)
                   :content (doall (csv/read-csv input-file)) }))
-          (:data-files config-map))
+          (config-label config-map))
 
        headers
          (do

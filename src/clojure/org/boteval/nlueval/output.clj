@@ -16,24 +16,35 @@
     (name value)
     value))
 
-(defn csv-format [evaluation]
-  " turns the evaluation collection into csv writing input "
-  (assert (apply = (map keys evaluation))
+
+(defn order-by-headers [headers-order key-vals]
+  {:pre [(map? key-vals)]}
+    (map
+      (fn [header]
+        (header key-vals))
+      headers-order))
+
+
+(defn csv-format [data]
+  " turns a collection into csv writing input, while turning any clojure keyword into its name (removing the ':')
+    if a headers-order sequence is provided, orders each row by that order "
+  (assert (apply = (map keys data))
     "internal error: data has inconsistent row keys, cannot be converted to csv")
-  { :headers (map name (keys (first evaluation))) ;; as all rows have same key set
+  { :headers (map name (keys (first data))) ;; as all rows have same key set
     :data
       (map
         #(map de-keyword %)
-      (map vals evaluation)) })
+      (map vals data)) })
+
 
 (defn write-csv [path {:keys [headers data]}]
   {:pre [(instance? java.io.File path)]}
 
   #_(do
-    (println headers)
-    (println (first data)))
+    (cprint headers)
+    (cprint (first data)))
 
-  (with-open [out-file (io/writer path)] ; TODO: make a writeer out of a clojure.java.io/file to include an OS agnostic path to write the CSV file under the output dir
+  (with-open [out-file (io/writer path)] ; TODO: make a writer out of a clojure.java.io/file to include an OS agnostic path to write the CSV file under the output dir
     (csv/write-csv
       out-file
       (cons headers data))))

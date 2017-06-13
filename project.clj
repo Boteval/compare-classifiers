@@ -48,7 +48,13 @@
                      [criterium "0.4.3"]
                      [rhizome "0.2.5"]
                      ;[org.noisesmith.poirot :as poirot]
-                     ]}}
+                     ]}
+
+             :eval     {:main org.boteval.nlueval.main}
+             :gold-fix {:main org.boteval.nlueval.prep-util.gold-fix}}
+
+  :aliases  {"eval"     ["with-profile" "eval"     "run"]
+             "gold-fix" ["with-profile" "gold-fix" "run"]}
 
   :plugins [[io.aviso/pretty "0.1.33"]      ; pretty exceptions in leinigen, needed here as well as in :dependencies
             [mvxcvi/whidbey "1.3.1"]        ; more colorful repl (https://github.com/greglook/whidbey)

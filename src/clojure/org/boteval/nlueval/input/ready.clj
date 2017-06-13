@@ -11,26 +11,28 @@
     [org.boteval.nlueval.input.canonicalize :refer :all]))
 
 
-(defn ready-data []
+(defn ready-data [config-label]
 
-  " create a map with all we need to use the raw data "
+  " create a map with all we need to use the input data "
 
-  (let  ;; get all the base data ready
-
-    [data (read-data)
+  (let
+    [data (read-data config-label)
 
      gold (:gold-set data)
-
-     classifiers-under-test (:result-sets data)
 
      gold-taggings (doall (get-canonical-tagging data gold))
 
      target-tag-set
        (get-tag-set (flatten (map :taggings gold-taggings)))
 
+     classifiers-under-test
+       (:result-sets data)
+
      classifiers-under-test-taggings
        (flatten
-         (map (partial get-canonical-tagging data) classifiers-under-test))
+          (map
+             (partial get-canonical-tagging data)
+             classifiers-under-test))
 
      all-taggings
        (apply merge gold-taggings classifiers-under-test-taggings)
@@ -44,7 +46,6 @@
 
      (to-map
        gold
-       gold-taggings
        classifiers-under-test
        target-tag-set
        objects-tagging)))

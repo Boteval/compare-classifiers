@@ -2,6 +2,8 @@
   (:require
     [clojure.test :refer :all]
     [clojure.pprint :refer [pprint]]
+    [puget.printer :refer [cprint]]
+    [clojure.inspector :as inspect :refer [inspect-tree]]
     [clojure.data.csv :as csv]
     [clojure.java.io :as io]
 ))
@@ -11,7 +13,8 @@
     useful e.g. for data being read from text or csv files "
   (condp instance? variable
     String (Float/parseFloat variable)
-    Long (float variable)))
+    Long (float variable)
+    (throw (Exception. (str "unexpected type: " (class variable))))))
 
 
 (defn abs-distance
@@ -70,16 +73,6 @@
   (= (get! map key) expected-value))
 
 
-(defn file-with-parents [path filename]
-  {:pre [(list? path) (string? filename)]}
-  " returns file object ready to use, creating its parents hierarchy if it does not exist yet "
-  (let
-    [full-path (concat path (list filename))
-      file (apply io/file full-path)]
-    (io/make-parents file)
-    file))
-
-
 (defn spit-create [& args]
   " like spit, but creates the full path to the file if it doesn't exist yet "
   (let [path (drop-last args)
@@ -125,3 +118,51 @@
   {:pre [(seq? path-seq) (every? string? path-seq)]}
   " gets a java file object from a path sequence "
   (apply io/file path-seq))
+
+
+(defn file-with-parents [path filename]
+  {:pre [(list? path) (string? filename)]}
+  " returns file object ready to use, creating its parents hierarchy if it does not exist yet "
+  (let
+    [full-path (concat path (list filename))
+      file (apply io/file full-path)]
+    (io/make-parents file)
+    file))
+
+
+(defn read-csv [base-path input-file-name]
+
+  " loads a headers-row prefixed csv file.
+    note that columns having an empty string header are silently dropped.
+
+    TODO: enforce distinct header names to avoid undeterminism when there are duplicate header names "
+
+  (let [file (io/file base-path input-file-name)
+        input-file (read-string (slurp file))]
+
+    (println (str "reading " (.getPath file)))
+
+    (with-open [input-file (io/reader file)]
+      (let
+         [content (csv/read-csv input-file)
+          headers
+            (map keyword (first content))
+          data
+            (map
+              (fn [content-row]
+                (into (hash-map)
+                  (remove ; discards columns having an empty-string header
+                    #(= (key %) (keyword ""))
+                    (zipmap headers content-row))))
+              (rest content))
+
+          headers
+            (remove ; discards empty-string headers
+              #(= % (keyword ""))
+              headers)]
+
+          (println (count data) "rows read")
+
+          (to-map
+             headers
+             data)))))

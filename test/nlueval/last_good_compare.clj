@@ -26,7 +26,7 @@
 
       (if (every? #(.exists %) last-goods)
         (time (do
-          (let [ready-data (ready-data)]
+          (let [ready-data (ready-data :data-files)]
             (execute
               (dims ready-data)
               ready-data))

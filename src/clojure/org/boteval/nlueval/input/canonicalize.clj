@@ -57,13 +57,14 @@
          :object-id (object-id-mapping row)
 
          :object-data-origin (:data-group row) ; TODO: sticking this here is the number one hack of this code base.
-         ;       to clean this up, make the objects-tagging collection a
-         ;       collection where each element is a keyed map, storing
-         ;       this bit of information at the object level there.
+         ; to clean this up, make the objects-tagging collection a
+         ; collection where each element is a keyed map, storing
+         ; this bit of information at the object level there.
 
          :taggings
            (doall (map
-             (fn [tag-map]
+             (fn
+               [tag-map]
                (apply hash-map
                       (mapcat
                         (fn [[canonical-tag header]]
