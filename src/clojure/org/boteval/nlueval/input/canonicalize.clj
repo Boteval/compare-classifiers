@@ -83,9 +83,9 @@
                                             (if (keyword? header)
                                               (get row header)
                                               header)]
-                                           (as-float (value-or-default value 1)))
+                                           (as-double (value-or-default value 1)))
 
-                             :confidence-scale (as-float header)) ])
+                             :confidence-scale (as-double header)) ])
 
                         tag-map)))
              result-set-mapping)))]

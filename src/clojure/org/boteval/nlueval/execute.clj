@@ -96,7 +96,7 @@
 
          :cutoff
            {:name :cutoff
-            :vals (range 0 1 0.02)
+            :vals (interval-points 0 1 50)
             :evaluation-config-transform
             (fn [current-dim-val evaluation-config] (assoc evaluation-config :cutoff current-dim-val))}
 
@@ -144,7 +144,7 @@
 
   " drive evaluation on two evaluation methods sharing some of their dimensions "
 
-     (write-evaluation-result
+     #_(write-evaluation-result
        "accuracy-at"
        (evaluate-on-dimensions
          (partial trace-write "accuracy-at")

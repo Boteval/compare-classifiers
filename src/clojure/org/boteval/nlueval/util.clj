@@ -8,6 +8,20 @@
     [clojure.java.io :as io]
 ))
 
+
+(defmacro is-function? [x]
+  " just pulls in clojure.test's function? into scope "
+  `(function? ~x))
+
+
+(defn as-double [variable]
+  " takes an argument of unknown primitive type, and transforms it to a float without crashing on any case.
+    useful e.g. for data being read from text or csv files "
+  (condp instance? variable
+    String (Double/parseDouble variable)
+    Long (double variable)
+    (throw (Exception. (str "unexpected type: " (class variable))))))
+
 (defn as-float [variable]
   " takes an argument of unknown primitive type, and transforms it to a float without crashing on any case.
     useful e.g. for data being read from text or csv files "
@@ -15,6 +29,27 @@
     String (Float/parseFloat variable)
     Long (float variable)
     (throw (Exception. (str "unexpected type: " (class variable))))))
+
+
+(with-test
+  (defn interval-points
+    [start end number-of-intervals]
+    {:pre [(number? start) (number? end) (number? number-of-intervals)]}
+
+    " returns an ordered list of evenly-spaced interval points
+      between the start and end numbers, the start and end included.
+
+      compared to clojure.core's `range` this is inclusive, numerically stable, and always returns doubles"
+
+    (let
+      [step-size (/ (- end start) number-of-intervals )]
+      (map
+        double
+        (range start (+ step-size end) step-size))))
+
+  (do
+    (assert (= '(0 0.5 1) (interval-points 0 1 2)))
+    (assert (some #(= % 0.22) (interval-points 0 1 50)))))
 
 
 (defn abs-distance
@@ -101,11 +136,6 @@
            bar (* foo 2)]
           (to-map foo bar))
         {:foo 1 :bar 2})))
-
-
-(defmacro is-function? [x]
-  " just pulls in clojure.test's function? into scope "
-  `(function? ~x))
 
 
 (defn third [x]
