@@ -1,6 +1,6 @@
 # compare-classifiers
 
-A library for juxtaposing classification performance metrics of multiple classifiers over the same data.
+A library for juxtaposing classification performance metrics of either multiple classifiers, or different versions of the same classifier, over the same dataset.
 
 ## Usage
 
