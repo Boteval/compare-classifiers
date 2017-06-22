@@ -1,5 +1,5 @@
-(defproject boteval "0.1.0-SNAPSHOT"
-  :description "ad-hoc classifier level NLU evaluation tooling"
+(defproject org.boteval.nlueval "0.0.1"
+  :description "multi-label classifier evaluation"
   :url "https://github.com/Boteval/nlu-eval"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
@@ -65,6 +65,6 @@
   ; this doesn't work yet ― see https://github.com/weavejester/lein-auto/issues/6
   ; :auto {:default {:paths (:source-paths :java-source-paths :test-paths :java-source-paths "my path")}} ; https://github.com/weavejester/lein-auto#usage
 
-  :codox {:metadata {:doc/format :markdown}} ; treat docstrings as codox extended markdown (https://github.com/weavejester/codox/blob/master/example/src/clojure/codox/markdown.clj)
+  :codox {:metadata {:doc/format :markdown}}) ; treat docstrings as codox extended markdown (https://github.com/weavejester/codox/blob/master/example/src/clojure/codox/markdown.clj)
 
-  :main org.boteval.nlueval.main)
+
