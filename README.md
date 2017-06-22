@@ -1,23 +1,24 @@
-# nlu-eval
+# compare-classifiers
 
-A tool for comparative evaluation of categorical classification outputs.
+A library for juxtaposing classification performance metrics of multiple classifiers over the same data.
 
 ## Usage
 
-Git clone this repo.
+1. Add the following dependency in project.clj:
 
-1. [Install leiningen](https://leiningen.org/#install)
+  ```clojure
+  [org.boteval.nlueval "0.0.1"]
+  ```
 
-2. Place the following into the `input` directory:
+2. Place the following under an `input` directory in your project:
 
         2.1 one or more CSV data files containing a gold tagging alongside a classifier's tagging per object.
 
-        2.2 a mapping file from possibly proprietary header names used in your CSV → to names used by this program. see sample mapping file below.
+        2.2 a mapping file from header names used in your CSV → to names used by this program. see sample mapping file below.
 
-3. from a terminal session, run: `lein run`.
+3. Follow the example code in the example usage project at https://github.com/Boteval/compare-classifiers-example
 
 Note that outputs will be generated under the directory "output".
-
 
 ## Sample Mapping file
 
