@@ -7,7 +7,7 @@ This library simply computes performance metrics of your choice, over an input C
 + __multi-dimensional evaluation resulting in a data cube__  
 It is [easy to specify a plurality of dimensions](https://github.com/Boteval/compare-classifiers-example/blob/f3c7dd63b353bd1cd7ded1e788382006d6a1c607/src/clojure/org/boteval/nlueval_sample/execute.clj#L67-L127), each ranging over its own set of values, and get the performance metric calculated for each combination of every value of each those dimensions ― in a single run.
 
-+ __simple map-reduce specification of a performance metrics__  
++ __simple map-reduce specification of performance metrics__  
 To compute a performance metric over the input data, all it takes is writing or supplying a specification comprising two parts: a mapper which operates on every object, and a reducer that aggregates the computation for all objects of the dataset.
   here's an example metric spec:
 
@@ -65,7 +65,7 @@ To compute a performance metric over the input data, all it takes is writing or 
             :accuracy accuracy }))})
           ```
 + __seamless audit trail__  
-Remember, we can easily get a cube where each metric is computed per combinatoric combination of all values of all dimensions. Each evaluation seamlessly gets its own audit file, where the mapper's result per object is neatly recorded ― so you can always trace/audit/prove how your calculation was made. Look for the audits under the `traces` sub-directories under `output`.
+Remember, we can easily get a cube where each metric is computed per combinatoric combination of all values of all dimensions provided. Each evaluation seamlessly gets its own audit file, where the mapper's result per object is neatly recorded ― so you can always trace/audit/prove how your calculation was made. Look for the audits under the `traces` sub-directories under `output`.
 
 + __convenient CSV input format__  
 As input, this library expects a CSV file containing object-ids and their gold tagging, along taggings returned by one or more classifiers. If the objects are text to be categorized, you may include the actual texts alongside the object-id column ― the library will ignore all columns that are not specifically designated through your user-supplied mapping file.  
