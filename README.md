@@ -14,7 +14,7 @@ To compute a performance metric over the input data, all it takes is writing or 
   ```clojure
   (def multi-label-accuracy
 
-    " prescribes calculation of multi-lable accuracy per object "  
+    " prescribes calculation of multi-label accuracy per object "  
 
     { :mapper (fn mapper [gold-tags test-tags _]
        (let
@@ -60,9 +60,9 @@ To compute a performance metric over the input data, all it takes is writing or 
               (apply + (map :intersection-vs-union row-evaluations))
               (count row-evaluations))]
 
-      { :recall recall
-        :precision precision
-        :accuracy accuracy })) })
+          { :recall recall
+            :precision precision
+            :accuracy accuracy }))})
           ```
 + __seamless audit trail__  
 Remember, we can easily get a cube where each metric is computed per combinatoric combination of all values of all dimensions. Each evaluation seamlessly gets its own audit file, where the mapper's result per object is neatly recorded ― so you can always trace/audit/prove how your calculation was made.
