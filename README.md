@@ -12,9 +12,9 @@ To compute a performance metric over the input data, all it takes is writing or 
   here's an example metric spec:
 
   ```clojure
-  (def Godbole-accuracy
+  (def multi-label-accuracy
 
-  " prescribes calculation of accuracy at n per object,
+  " prescribes calculation of multi-lable accuracy per object,
   { :mapper (fn mapper [gold-tags test-tags _]
        (let
           [intersection-set (intersection gold-tags test-tags); the correctly predicted
