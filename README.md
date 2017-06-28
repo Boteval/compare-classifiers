@@ -50,15 +50,15 @@ To compute a performance metric over the input data, all it takes is writing or 
               (apply + (map :correct-vs-gold row-evaluations))
               (count row-evaluations))
 
-          precision
-            (divide-or-undef
-              (apply + (map :correct-vs-predicted row-evaluations))
-              (count row-evaluations))
+           precision
+             (divide-or-undef
+               (apply + (map :correct-vs-predicted  row-evaluations))
+               (count row-evaluations))
 
-          accuracy
-            (divide-or-undef
-              (apply + (map :intersection-vs-union row-evaluations))
-              (count row-evaluations))]
+           accuracy
+             (divide-or-undef
+               (apply + (map :intersection-vs-union row-evaluations))
+               (count row-evaluations))]
 
           { :recall recall
             :precision precision
