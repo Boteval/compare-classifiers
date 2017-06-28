@@ -158,6 +158,9 @@ The following sample demonstrates how the required mapping file informs the prog
 1. All input data files must have the same headers structure.
 2. An object id must be unique across all input data files provided to a single run.
 
+## Status
+
+Although this has been teased apart as a library, input validations to make it idiot-proof, and more proper documentation is still missing. In particular, sample input data needs to be added to the sample project, to provide a more full and useful sample usage example.
 
 ## License
 
