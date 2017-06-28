@@ -5,7 +5,7 @@ A library for juxtaposing classification performance metrics of either multiple 
 This library simply computes performance metrics of your choice, over an input CSV file containing gold and classifier predicted labels, while sporting the following humble features:
 
 + __multi-dimensional evaluation resulting in a data cube__  
-It is easy to specify a plurality of dimensions, each ranging over its own set of values, and get the performance metric calculated for each combination of every value of each those dimensions ― in a single run.
+It is [easy to specify a plurality of dimensions](https://github.com/Boteval/compare-classifiers-example/blob/f3c7dd63b353bd1cd7ded1e788382006d6a1c607/src/clojure/org/boteval/nlueval_sample/execute.clj#L67-L127), each ranging over its own set of values, and get the performance metric calculated for each combination of every value of each those dimensions ― in a single run.
 
 + __simple map-reduce specification of a performance metrics__  
 To compute a performance metric over the input data, all it takes is writing or supplying a specification comprising two parts: a mapper which operates on every object, and a reducer that aggregates the computation for all objects of the dataset.
@@ -88,9 +88,9 @@ It can be very convenient exploring your metrics across your dimensions, by then
 
 2. Place the following under an `input` directory in your project:
 
-      2.1 your one or more CSV data files containing a gold tagging alongside a classifier's tagging per object.
+    2.1 your one or more CSV data files containing a gold tagging alongside a classifier's tagging per object.
 
-      2.2 a mapping file from header names used in your CSV → to names used by this program. see the sample mapping file copied here below.
+    2.2 a mapping file from header names used in your CSV → to names used by this program. see the sample mapping file copied here below.
 
 3. Follow the example code in the example usage project at https://github.com/Boteval/compare-classifiers-example for defining your performance metrics and any dimensions you wish to iterate them on.
 
