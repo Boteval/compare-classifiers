@@ -65,14 +65,14 @@ To compute a performance metric over the input data, all it takes is writing or 
             :accuracy accuracy }))})
           ```
 + __seamless audit trail__  
-Remember, we can easily get a cube where each metric is computed per combinatoric combination of all values of all dimensions. Each evaluation seamlessly gets its own audit file, where the mapper's result per object is neatly recorded ― so you can always trace/audit/prove how your calculation was made.
+Remember, we can easily get a cube where each metric is computed per combinatoric combination of all values of all dimensions. Each evaluation seamlessly gets its own audit file, where the mapper's result per object is neatly recorded ― so you can always trace/audit/prove how your calculation was made. Look for the audits under the `traces` sub-directories under `output`.
 
 + __convenient CSV input format__  
-As input, this library expects a CSV file containing object-ids and their gold tagging, along taggings returned by one or more classifiers. If the objects are text to be categorized, you may include the actual texts alongside the object-id column ― the library will ignore all columns that are not specifically designated through a mapping file.  
+As input, this library expects a CSV file containing object-ids and their gold tagging, along taggings returned by one or more classifiers. If the objects are text to be categorized, you may include the actual texts alongside the object-id column ― the library will ignore all columns that are not specifically designated through your user-supplied mapping file.  
 
   Rather than relying on a hardwired naming convention for CSV column headers, this library can process any CSV file, as long as the first row comprises the column headers ― an input mapping file is used to tell the library which columns to look at (more on the mapping file syntax below).
-
-+ __concurrency__
+Output files will be generated under the `output` directory.
++ __concurrency__  
 While not yet performance optimized, this library will squeeze out all the CPU power available on your machine, parallelizing its computation for different dimensions.
 
 + __CSV output cube__  
@@ -88,9 +88,9 @@ It can be very convenient exploring your metrics across your dimensions, by then
 
 2. Place the following under an `input` directory in your project:
 
-        2.1 your one or more CSV data files containing a gold tagging alongside a classifier's tagging per object.
+      2.1 your one or more CSV data files containing a gold tagging alongside a classifier's tagging per object.
 
-        2.2 a mapping file from header names used in your CSV → to names used by this program. see the sample mapping file copied here below.
+      2.2 a mapping file from header names used in your CSV → to names used by this program. see the sample mapping file copied here below.
 
 3. Follow the example code in the example usage project at https://github.com/Boteval/compare-classifiers-example for defining your performance metrics and any dimensions you wish to iterate them on.
 
