@@ -82,9 +82,9 @@ It can be very convenient exploring your metrics across your dimensions, by then
 
 1. Add the following dependency in project.clj:
 
-  ```clojure
-  [org.boteval.nlueval "0.0.1"]
-  ```
+    ```clojure
+    [org.boteval.nlueval "0.0.1"]
+    ```
 
 2. Place the following under an `input` directory in your project:
 
