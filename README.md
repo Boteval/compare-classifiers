@@ -9,6 +9,60 @@ It is easy to specify a plurality of dimensions, each ranging over its own set o
 
 + __simple map-reduce specification of a performance metrics__  
 To compute a performance metric over the input data, all it takes is writing or supplying a specification comprising two parts: a mapper which operates on every object, and a reducer that aggregates the computation for all objects of the dataset.
+  here's an example metric spec:
+
+  ```clojure
+  (def Godbole-accuracy
+
+  " prescribes calculation of accuracy at n per object,
+  { :mapper (fn mapper [gold-tags test-tags _]
+       (let
+          [intersection-set (intersection gold-tags test-tags); the correctly predicted
+           union-set (union gold-tags test-tags)
+
+           correct-vs-gold ; for recall summation
+           (divide-or-default
+             (count intersection-set)
+             (count gold-tags)
+             1) ;; default to voidly perfect recall if nothing to recall for the object
+
+           correct-vs-predicted ; for precision summation
+           (divide-or-default
+             (count intersection-set)
+             (count test-tags)
+             1) ; default to voidly perfect precision if no predictions made for the object
+
+           intersection-vs-union ; for accuracy summation
+           (divide-or-default
+             (count intersection-set)
+             (count union-set)
+             1)] ; default to perfect accuracy if no predictions nor gold tags for the object
+
+          { :correct-vs-gold correct-vs-gold
+            :correct-vs-predicted correct-vs-predicted
+            :intersection-vs-union intersection-vs-union}))
+
+   :reducer (fn reducer [row-evaluations]
+      (let
+        [recall
+            (divide-or-undef
+              (apply + (map :correct-vs-gold row-evaluations))
+              (count row-evaluations))
+
+          precision
+            (divide-or-undef
+              (apply + (map :correct-vs-predicted row-evaluations))
+              (count row-evaluations))
+
+          accuracy
+            (divide-or-undef
+              (apply + (map :intersection-vs-union row-evaluations))
+              (count row-evaluations))]
+
+        { :recall recall
+          :precision precision
+          :accuracy accuracy })) })
+          ```
 + __seamless audit trail__  
 Remember, we can easily get a cube where each metric is computed per combinatoric combination of all values of all dimensions. Each evaluation seamlessly gets its own audit file, where the mapper's result per object is neatly recorded ― so you can always trace/audit/prove how your calculation was made.
 
