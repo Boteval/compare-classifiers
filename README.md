@@ -160,7 +160,9 @@ The following sample demonstrates how the required mapping file informs the prog
 
 ## Status
 
-Although this has been teased apart as a library, input validations to make it idiot-proof, and more proper documentation is still missing. In particular, sample input data needs to be added to the sample project, to provide a more full and useful sample usage example.
+Although this has been teased apart as a library, input validations to make it idiot-proof, and more proper documentation are somewhat lacking. In particular, sample input data needs to be added to the sample project, to provide a more full and useful example of sample usage.
+
+Also, few (minor) scenario-specific constructs irrelevant for generic use may have persisted in the code.
 
 ## License
 
